@@ -41,6 +41,8 @@ testdata/
  *.dockerignore
  *.compose
 
+ # Игнорируем скомпилированные бинарные файлы
+go_final_project
 
-# Логи работы сервера
-*.log
+# Игнорируем базу данных
+scheduler.db
