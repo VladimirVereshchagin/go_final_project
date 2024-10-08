@@ -1,13 +1,17 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
@@ -32,9 +36,10 @@ func main() {
 
 	// Регистрируем API обработчики
 	http.HandleFunc("/api/nextdate", nextDateHandler)
-	http.HandleFunc("/api/task", taskHandler)
-	http.HandleFunc("/api/tasks", tasksHandler)
-	http.HandleFunc("/api/task/done", doneTaskHandler)
+	http.HandleFunc("/api/task", auth(taskHandler))
+	http.HandleFunc("/api/tasks", auth(tasksHandler))
+	http.HandleFunc("/api/task/done", auth(doneTaskHandler))
+	http.HandleFunc("/api/signin", signHandler)
 
 	// Устанавливаем порт из переменной окружения или по умолчанию
 	port := os.Getenv("TODO_PORT")
@@ -49,6 +54,132 @@ func main() {
 		log.Fatal("Ошибка запуска сервера: ", err)
 	}
 }
+
+// auth middleware function
+func auth(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		pass := os.Getenv("TODO_PASSWORD")
+		if pass == "" {
+			// Если пароль не задан, аутентификация не требуется
+			next(w, r)
+			return
+		}
+
+		// Получаем токен из куки
+		cookie, err := r.Cookie("token")
+		if err != nil {
+			// Токен отсутствует
+			http.Error(w, "Authentication required", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := cookie.Value
+
+		// Парсим и проверяем токен
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			// Проверяем метод подписи
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			// Возвращаем ключ (пароль)
+			return []byte(pass), nil
+		})
+		if err != nil || !token.Valid {
+			http.Error(w, "Authentication required", http.StatusUnauthorized)
+			return
+		}
+
+		// Проверяем claims
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			http.Error(w, "Authentication required", http.StatusUnauthorized)
+			return
+		}
+
+		// Проверяем хэш пароля
+		if claims["hash"] != generatePasswordHash(pass) {
+			http.Error(w, "Authentication required", http.StatusUnauthorized)
+			return
+		}
+
+		// Токен валиден
+		next(w, r)
+	})
+}
+
+// signHandler handles the /api/sign endpoint
+func signHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	defer r.Body.Close()
+
+	if r.Method != http.MethodPost {
+		http.Error(w, `{"error":"Метод не поддерживается"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Читаем тело запроса
+	var creds struct {
+		Password string `json:"password"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		log.Println("Ошибка чтения JSON:", err)
+		http.Error(w, `{"error":"Ошибка чтения JSON"}`, http.StatusBadRequest)
+		return
+	}
+
+	// Получаем пароль из переменной окружения
+	pass := os.Getenv("TODO_PASSWORD")
+
+	if pass == "" {
+		// Пароль не задан, аутентификация не требуется
+		http.Error(w, `{"error":"Аутентификация не требуется"}`, http.StatusBadRequest)
+		return
+	}
+
+	// Сравниваем пароли
+	if creds.Password != pass {
+		http.Error(w, `{"error":"Неверный пароль"}`, http.StatusUnauthorized)
+		return
+	}
+
+	// Создаём JWT токен
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	// Устанавливаем claims
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "user"                               // Subject
+	claims["exp"] = time.Now().Add(8 * time.Hour).Unix() // Истекает через 8 часов
+	claims["hash"] = generatePasswordHash(pass)          // Хэш пароля для проверки
+
+	// Подписываем токен
+	tokenString, err := token.SignedString([]byte(pass))
+	if err != nil {
+		log.Println("Ошибка генерации JWT токена:", err)
+		http.Error(w, `{"error":"Ошибка генерации токена"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Возвращаем токен
+	response := map[string]interface{}{
+		"token": tokenString,
+	}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		log.Println("Ошибка кодирования JSON:", err)
+		http.Error(w, `{"error":"Ошибка кодирования JSON"}`, http.StatusInternalServerError)
+		return
+	}
+}
+
+// generatePasswordHash generates a hash of the password
+func generatePasswordHash(password string) string {
+	hash := sha256.Sum256([]byte(password))
+	return hex.EncodeToString(hash[:])
+}
+
+// Остальной код остаётся без изменений
 
 // taskHandler обрабатывает запросы для /api/task
 func taskHandler(w http.ResponseWriter, r *http.Request) {
