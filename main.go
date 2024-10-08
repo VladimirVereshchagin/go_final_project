@@ -34,6 +34,7 @@ func main() {
 	http.HandleFunc("/api/nextdate", nextDateHandler)
 	http.HandleFunc("/api/task", taskHandler)
 	http.HandleFunc("/api/tasks", tasksHandler)
+	http.HandleFunc("/api/task/done", doneTaskHandler)
 
 	// Устанавливаем порт из переменной окружения или по умолчанию
 	port := os.Getenv("TODO_PORT")
@@ -47,6 +48,121 @@ func main() {
 	if err != nil {
 		log.Fatal("Ошибка запуска сервера: ", err)
 	}
+}
+
+// taskHandler обрабатывает запросы для /api/task
+func taskHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		addTaskHandler(w, r) // Обработка добавления новой задачи
+	case http.MethodGet:
+		getTaskHandler(w, r) // Обработка получения задачи по ID
+	case http.MethodPut:
+		editTaskHandler(w, r) // Обработка редактирования задачи
+	case http.MethodDelete:
+		deleteTaskHandler(w, r) // Обработка удаления задачи
+	default:
+		http.Error(w, `{"error":"Метод не поддерживается"}`, http.StatusMethodNotAllowed)
+	}
+}
+
+// doneTaskHandler обрабатывает отметку задачи как выполненной
+func doneTaskHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	if r.Method != http.MethodPost {
+		http.Error(w, `{"error":"Метод не поддерживается"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, `{"error":"Не указан идентификатор задачи"}`, http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, `{"error":"Некорректный идентификатор задачи"}`, http.StatusBadRequest)
+		return
+	}
+
+	var task Task
+	err = db.Get(&task, `SELECT * FROM scheduler WHERE id = ?`, id)
+	if err != nil {
+		log.Println("Задача не найдена:", err)
+		http.Error(w, `{"error":"Задача не найдена"}`, http.StatusNotFound)
+		return
+	}
+
+	if task.Repeat == "" {
+		// Если задача одноразовая, удаляем её
+		_, err = db.Exec(`DELETE FROM scheduler WHERE id = ?`, id)
+		if err != nil {
+			log.Println("Ошибка удаления задачи:", err)
+			http.Error(w, `{"error":"Ошибка удаления задачи"}`, http.StatusInternalServerError)
+			return
+		}
+	} else {
+		// Если задача повторяющаяся, вычисляем следующую дату
+		now := time.Now().UTC()
+		now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+
+		nextDate, err := NextDate(now, task.Date, task.Repeat)
+		if err != nil {
+			log.Println("Ошибка вычисления следующей даты:", err)
+			http.Error(w, `{"error":"Ошибка вычисления следующей даты"}`, http.StatusInternalServerError)
+			return
+		}
+
+		// Обновляем дату задачи
+		_, err = db.Exec(`UPDATE scheduler SET date = ? WHERE id = ?`, nextDate, id)
+		if err != nil {
+			log.Println("Ошибка обновления задачи:", err)
+			http.Error(w, `{"error":"Ошибка обновления задачи"}`, http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Возвращаем пустой JSON при успешном выполнении
+	w.Write([]byte(`{}`))
+}
+
+// deleteTaskHandler обрабатывает удаление задачи
+func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, `{"error":"Не указан идентификатор задачи"}`, http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, `{"error":"Некорректный идентификатор задачи"}`, http.StatusBadRequest)
+		return
+	}
+
+	// Проверяем существование задачи
+	var task Task
+	err = db.Get(&task, `SELECT id FROM scheduler WHERE id = ?`, id)
+	if err != nil {
+		log.Println("Задача не найдена:", err)
+		http.Error(w, `{"error":"Задача не найдена"}`, http.StatusNotFound)
+		return
+	}
+
+	// Удаляем задачу
+	_, err = db.Exec(`DELETE FROM scheduler WHERE id = ?`, id)
+	if err != nil {
+		log.Println("Ошибка удаления задачи:", err)
+		http.Error(w, `{"error":"Ошибка удаления задачи"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Возвращаем пустой JSON при успешном удалении
+	w.Write([]byte(`{}`))
 }
 
 // nextDateHandler обрабатывает запросы на получение следующей даты задачи
@@ -77,20 +193,6 @@ func nextDateHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Возвращаем результат
 	w.Write([]byte(nextDate))
-}
-
-// taskHandler обрабатывает запросы для /api/task
-func taskHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		addTaskHandler(w, r) // Обработка добавления новой задачи
-	case http.MethodGet:
-		getTaskHandler(w, r) // Обработка получения задачи по ID
-	case http.MethodPut:
-		editTaskHandler(w, r) // Обработка редактирования задачи
-	default:
-		http.Error(w, `{"error":"Метод не поддерживается"}`, http.StatusMethodNotAllowed)
-	}
 }
 
 // tasksHandler возвращает список задач с возможностью поиска
