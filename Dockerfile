@@ -1,5 +1,5 @@
 # Этап сборки
-FROM golang:1.20 AS builder
+FROM golang:1.22 AS builder
 
 # Устанавливаем рабочую директорию внутри контейнера
 WORKDIR /app
@@ -14,10 +14,10 @@ RUN go mod download
 COPY . .
 
 # Собираем приложение
-RUN CGO_ENABLED=1 GOOS=linux go build -o app .
+RUN CGO_ENABLED=1 GOOS=linux go build -o app ./cmd
 
 # Финальный этап
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 # Устанавливаем необходимые зависимости
 RUN apt-get update && apt-get install -y libsqlite3-0

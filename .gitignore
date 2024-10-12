@@ -4,6 +4,7 @@
 *.so
 *.dylib
 *.test
+/app
 
 # Файлы логов
 *.log
