@@ -27,6 +27,10 @@ jobs:
     - name: Install dependencies
       run: go mod download
 
+    - name: Set up database schema
+      run: |
+        sqlite3 scheduler.db < schema.sql
+
     - name: Build
       run: go build -v ./cmd/main.go
 
