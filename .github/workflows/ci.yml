@@ -12,7 +12,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -27,12 +26,17 @@ jobs:
     - name: Install dependencies
       run: go mod download
 
+    - name: Build
+      run: go build -v ./cmd/main.go
+
     - name: Set up database schema
       run: |
         sqlite3 scheduler.db < schema.sql
 
-    - name: Build
-      run: go build -v ./cmd/main.go
+    - name: Start server
+      run: |
+        nohup go run ./cmd/main.go & # Запуск сервера в фоновом режиме
+      timeout-minutes: 10
 
     - name: Run tests
       run: go test -v ./...
