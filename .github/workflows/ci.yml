@@ -1,12 +1,12 @@
-name: Go CI
+name: Go CI/CD
 
 on:
   push:
-    branches: 
+    branches:
       - main
       - new-feature
   pull_request:
-    branches: 
+    branches:
       - main
       - new-feature
 
@@ -27,16 +27,7 @@ jobs:
       run: go mod download
 
     - name: Build
-      run: go build -v ./cmd/main.go
-
-    - name: Set up database schema
-      run: |
-        sqlite3 scheduler.db < schema.sql
-
-    - name: Start server
-      run: |
-        nohup go run ./cmd/main.go & # Запуск сервера в фоновом режиме
-      timeout-minutes: 10
+      run: go build -v ./...
 
     - name: Run tests
       run: go test -v ./...
@@ -45,3 +36,12 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         version: v1.52.2
+
+    - name: Build Docker image
+      run: docker build -t vladimirvereschagin/go_final_project:latest .
+
+    - name: Push Docker image to DockerHub
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        docker push vladimirvereschagin/go_final_project:latest
