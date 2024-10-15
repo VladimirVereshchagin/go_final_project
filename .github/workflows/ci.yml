@@ -18,7 +18,7 @@ jobs:
     env:
       TODO_PORT: 7540
       TODO_DBFILE: scheduler.db
-      TODO_PASSWORD: ${{ secrets.TODO_PASSWORD }}  # Используем секрет для безопасности
+      TODO_PASSWORD: ${{ secrets.TODO_PASSWORD }}
 
     steps:
     - name: Checkout code
@@ -43,25 +43,22 @@ jobs:
       run: go mod download
 
     - name: Install SQLite3
-      run: sudo apt-get update && sudo apt-get install -y sqlite3
+      run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
 
     - name: Set up database schema
       run: |
         sqlite3 ${{ env.TODO_DBFILE }} < schema.sql
-      env:
-        TODO_DBFILE: scheduler.db
 
     - name: Build the application
-      run: go build -v -o app ./cmd/main.go
+      run: go build -v -o app ./cmd
 
     - name: Start the application
       run: |
         nohup ./app &
-        sleep 5 
+        sleep 5
 
     - name: Run tests
       run: |
-        sqlite3 ${{ env.TODO_DBFILE }} < schema.sql  # Убедимся, что таблица существует перед тестами
         go test -v ./...
       env:
         TODO_DBFILE: scheduler.db
