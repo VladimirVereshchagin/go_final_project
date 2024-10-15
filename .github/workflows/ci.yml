@@ -17,7 +17,7 @@ jobs:
 
     env:
       TODO_PORT: 7540
-      TODO_DBFILE: scheduler.db
+      TODO_DBFILE: ${{ github.workspace }}/scheduler.db
       TODO_PASSWORD: ${{ secrets.TODO_PASSWORD }}
 
     steps:
@@ -47,7 +47,7 @@ jobs:
 
     - name: Set up database schema
       run: |
-        sqlite3 ${{ env.TODO_DBFILE }} < schema.sql
+        sqlite3 "${{ env.TODO_DBFILE }}" < schema.sql
 
     - name: Build the application
       run: go build -v -o app ./cmd
@@ -61,7 +61,7 @@ jobs:
       run: |
         go test -v ./...
       env:
-        TODO_DBFILE: scheduler.db
+        TODO_DBFILE: ${{ env.TODO_DBFILE }}
 
     - name: Lint code
       uses: golangci/golangci-lint-action@v3

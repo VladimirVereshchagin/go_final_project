@@ -42,6 +42,9 @@ func NewDB(dbPath string) (*sqlx.DB, error) {
 		dbPath = filepath.Join(filepath.Dir(appPath), "scheduler.db")
 	}
 
+	// Добавляем логирование пути к базе данных
+	log.Printf("Используется файл базы данных: %s", dbPath)
+
 	// Проверяем наличие файла базы данных
 	_, err := os.Stat(dbPath)
 	install := false
