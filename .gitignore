@@ -34,22 +34,15 @@ vendor/
 
 # Файлы тестирования и покрытия
 *.coverprofile
-coverage.out
 testdata/
 
 # Скомпилированные файлы
 *.o
 *.a
 
-# Файлы деплоя и CI/CD
- *.dockerignore
- *.compose
-
 # Бинарный файл приложения
 go_final_project
 
-# База данных
-scheduler.db
 
 # Сессионные файлы
 cookies.txt
