@@ -1,3 +1,5 @@
+// internal/app/handlers.go
+
 package app
 
 import (
@@ -14,7 +16,9 @@ func writeJSONError(w http.ResponseWriter, statusCode int, message string) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(statusCode)
 	response := map[string]string{"error": message}
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	encoder := json.NewEncoder(w)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(response); err != nil {
 		log.Println("Ошибка при кодировании JSON-ошибки:", err)
 	}
 }
@@ -42,8 +46,9 @@ func (a *App) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var task models.Task
-	err := json.NewDecoder(r.Body).Decode(&task)
-	if err != nil {
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&task); err != nil {
 		// Ошибка при чтении тела запроса
 		log.Println("Ошибка чтения JSON:", err)
 		writeJSONError(w, http.StatusBadRequest, "Ошибка чтения JSON")
@@ -55,6 +60,8 @@ func (a *App) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, "Не указан заголовок задачи")
 		return
 	}
+
+	var err error
 
 	// Создание задачи
 	id, err := a.TaskService.CreateTask(&task)
@@ -68,7 +75,10 @@ func (a *App) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
 		"id": id,
 	}
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	encoder := json.NewEncoder(w)
+	encoder.SetEscapeHTML(false)
+	err = encoder.Encode(response)
+	if err != nil {
 		log.Println("Ошибка кодирования JSON:", err)
 		writeJSONError(w, http.StatusInternalServerError, "Ошибка кодирования JSON")
 	}
@@ -85,6 +95,8 @@ func (a *App) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var err error
+
 	// Поиск задачи по ID
 	task, err := a.TaskService.GetTaskByID(id)
 	if err != nil {
@@ -94,7 +106,10 @@ func (a *App) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Возвращаем найденную задачу
-	if err := json.NewEncoder(w).Encode(task); err != nil {
+	encoder := json.NewEncoder(w)
+	encoder.SetEscapeHTML(false)
+	err = encoder.Encode(task)
+	if err != nil {
 		log.Println("Ошибка кодирования JSON:", err)
 		writeJSONError(w, http.StatusInternalServerError, "Ошибка кодирования JSON")
 	}
@@ -106,8 +121,9 @@ func (a *App) editTaskHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var task models.Task
-	err := json.NewDecoder(r.Body).Decode(&task)
-	if err != nil {
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&task); err != nil {
 		// Ошибка при чтении тела запроса
 		log.Println("Ошибка чтения JSON:", err)
 		writeJSONError(w, http.StatusBadRequest, "Ошибка чтения JSON")
@@ -120,6 +136,8 @@ func (a *App) editTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var err error
+
 	// Обновление задачи
 	err = a.TaskService.UpdateTask(&task)
 	if err != nil {
@@ -129,8 +147,14 @@ func (a *App) editTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Успешное обновление
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{}`))
+	response := map[string]string{}
+	encoder := json.NewEncoder(w)
+	encoder.SetEscapeHTML(false)
+	err = encoder.Encode(response)
+	if err != nil {
+		log.Println("Ошибка кодирования JSON:", err)
+		writeJSONError(w, http.StatusInternalServerError, "Ошибка кодирования JSON")
+	}
 }
 
 // deleteTaskHandler - обрабатывает удаление задачи
@@ -143,8 +167,10 @@ func (a *App) deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var err error
+
 	// Удаление задачи
-	err := a.TaskService.DeleteTask(id)
+	err = a.TaskService.DeleteTask(id)
 	if err != nil {
 		log.Println("Ошибка удаления задачи:", err)
 		writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -152,8 +178,14 @@ func (a *App) deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Успешное удаление
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{}`))
+	response := map[string]string{}
+	encoder := json.NewEncoder(w)
+	encoder.SetEscapeHTML(false)
+	err = encoder.Encode(response)
+	if err != nil {
+		log.Println("Ошибка кодирования JSON:", err)
+		writeJSONError(w, http.StatusInternalServerError, "Ошибка кодирования JSON")
+	}
 }
 
 // handleTasks - обрабатывает получение списка задач
@@ -162,6 +194,8 @@ func (a *App) handleTasks(w http.ResponseWriter, r *http.Request) {
 
 	search := r.URL.Query().Get("search")
 	limit := 50
+
+	var err error
 
 	// Получаем список задач
 	tasks, err := a.TaskService.ListTasks(search, limit)
@@ -180,7 +214,10 @@ func (a *App) handleTasks(w http.ResponseWriter, r *http.Request) {
 		"tasks": tasks,
 	}
 
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	encoder := json.NewEncoder(w)
+	encoder.SetEscapeHTML(false)
+	err = encoder.Encode(response)
+	if err != nil {
 		log.Println("Ошибка кодирования JSON:", err)
 		writeJSONError(w, http.StatusInternalServerError, "Ошибка кодирования JSON")
 	}
@@ -201,8 +238,10 @@ func (a *App) handleDoneTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var err error
+
 	// Отметка задачи как выполненной
-	err := a.TaskService.MarkTaskDone(id)
+	err = a.TaskService.MarkTaskDone(id)
 	if err != nil {
 		log.Println("Ошибка при отметке задачи как выполненной:", err)
 		writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -210,15 +249,25 @@ func (a *App) handleDoneTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Успешное выполнение
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{}`))
+	response := map[string]string{}
+	encoder := json.NewEncoder(w)
+	encoder.SetEscapeHTML(false)
+	err = encoder.Encode(response)
+	if err != nil {
+		log.Println("Ошибка кодирования JSON:", err)
+		writeJSONError(w, http.StatusInternalServerError, "Ошибка кодирования JSON")
+	}
 }
 
 // handleNextDate - обрабатывает вычисление следующей даты задачи
 func (a *App) handleNextDate(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=UTF-8")
+
 	nowStr := r.FormValue("now")
 	dateStr := r.FormValue("date")
 	repeat := r.FormValue("repeat")
+
+	var err error
 
 	// Вычисляем следующую дату задачи
 	nextDate, err := a.TaskService.CalculateNextDate(nowStr, dateStr, repeat)
@@ -228,6 +277,7 @@ func (a *App) handleNextDate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Возвращаем следующую дату как простую строку
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(nextDate))
 }
 
@@ -246,8 +296,9 @@ func (a *App) handleSignIn(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&creds)
-	if err != nil {
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&creds); err != nil {
 		log.Println("Ошибка чтения JSON:", err)
 		writeJSONError(w, http.StatusBadRequest, "Ошибка чтения JSON")
 		return
@@ -260,13 +311,13 @@ func (a *App) handleSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Проверка пароля
 	if creds.Password != pass {
 		writeJSONError(w, http.StatusUnauthorized, "Неверный пароль")
 		return
 	}
 
 	// Генерация JWT токена
+	var err error
 	tokenString, err := utils.GenerateToken(pass)
 	if err != nil {
 		log.Println("Ошибка генерации JWT токена:", err)
@@ -278,7 +329,10 @@ func (a *App) handleSignIn(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
 		"token": tokenString,
 	}
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	encoder := json.NewEncoder(w)
+	encoder.SetEscapeHTML(false)
+	err = encoder.Encode(response)
+	if err != nil {
 		log.Println("Ошибка кодирования JSON:", err)
 		writeJSONError(w, http.StatusInternalServerError, "Ошибка кодирования JSON")
 	}
