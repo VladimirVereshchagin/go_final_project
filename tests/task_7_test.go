@@ -12,7 +12,7 @@ import (
 func notFoundTask(t *testing.T, id string) {
 	body, err := requestJSON("api/task?id="+id, nil, http.MethodGet)
 	assert.NoError(t, err)
-	var m map[string]any
+	var m map[string]interface{}
 	err = json.Unmarshal(body, &m)
 	assert.NoError(t, err)
 	_, ok := m["error"]
@@ -31,7 +31,8 @@ func TestDone(t *testing.T) {
 
 	ret, err := postJSON("api/task/done?id="+id, nil, http.MethodPost)
 	assert.NoError(t, err)
-	assert.Empty(t, ret)
+	expected := map[string]interface{}{"message": "Задача отмечена как выполненная"}
+	assert.Equal(t, expected, ret)
 	notFoundTask(t, id)
 
 	id = addTask(t, task{
@@ -42,7 +43,7 @@ func TestDone(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		ret, err := postJSON("api/task/done?id="+id, nil, http.MethodPost)
 		assert.NoError(t, err)
-		assert.Empty(t, ret)
+		assert.Equal(t, expected, ret)
 
 		var task Task
 		err = db.Get(&task, `SELECT * FROM scheduler WHERE id=?`, id)
@@ -62,14 +63,18 @@ func TestDelTask(t *testing.T) {
 	})
 	ret, err := postJSON("api/task?id="+id, nil, http.MethodDelete)
 	assert.NoError(t, err)
-	assert.Empty(t, ret)
+	expected := map[string]interface{}{"message": "Задача успешно удалена"}
+	assert.Equal(t, expected, ret)
 
 	notFoundTask(t, id)
 
 	ret, err = postJSON("api/task", nil, http.MethodDelete)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, ret)
+	_, ok := ret["error"]
+	assert.True(t, ok)
+
 	ret, err = postJSON("api/task?id=wjhgese", nil, http.MethodDelete)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, ret)
+	_, ok = ret["error"]
+	assert.True(t, ok)
 }

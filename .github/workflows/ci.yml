@@ -54,7 +54,7 @@ jobs:
         TODO_PASSWORD: ${{ secrets.TODO_PASSWORD }}
       run: |
         nohup ./app &
-        sleep 5
+        sleep 10
 
     - name: Run tests
       env:

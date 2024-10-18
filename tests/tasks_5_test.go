@@ -26,7 +26,7 @@ func addTask(t *testing.T, task task) string {
 
 func getTasks(t *testing.T, search string) []map[string]string {
 	url := "api/tasks"
-	if Search {
+	if Search && len(search) > 0 {
 		url += "?search=" + search
 	}
 	body, err := requestJSON(url, nil, http.MethodGet)
@@ -104,5 +104,4 @@ func TestTasks(t *testing.T) {
 	assert.Equal(t, len(tasks), 1)
 	tasks = getTasks(t, now.Format(`02.01.2006`))
 	assert.Equal(t, len(tasks), 3)
-
 }
