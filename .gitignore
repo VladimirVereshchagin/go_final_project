@@ -43,6 +43,6 @@ testdata/
 # Бинарный файл приложения
 go_final_project
 
-
-# Сессионные файлы
+# Временные файлы
 cookies.txt
+nohup.out

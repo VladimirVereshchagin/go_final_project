@@ -8,6 +8,7 @@ import (
 	"github.com/VladimirVereshchagin/go_final_project/internal/services"
 )
 
+// App представляет структуру приложения с его настройками и зависимостями
 type App struct {
 	Router      *http.ServeMux       // Маршрутизатор для обработки HTTP-запросов
 	TaskService services.TaskService // Сервис для работы с задачами

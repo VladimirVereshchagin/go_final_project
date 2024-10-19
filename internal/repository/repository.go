@@ -9,7 +9,7 @@ import (
 
 	"github.com/VladimirVereshchagin/go_final_project/internal/models"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // Импорт для SQLite драйвера
 )
 
 // TaskRepository - интерфейс для работы с задачами

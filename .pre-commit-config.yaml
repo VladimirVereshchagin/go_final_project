@@ -1,0 +1,19 @@
+repos:
+  - repo: local
+    hooks:
+      - id: go-vet
+        name: Custom Go Vet
+        entry: ./vet.sh
+        language: script
+        files: \.go$
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.61.0
+    hooks:
+      - id: golangci-lint
+        name: GolangCI Lint
+        entry: golangci-lint run
+        language: system
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
