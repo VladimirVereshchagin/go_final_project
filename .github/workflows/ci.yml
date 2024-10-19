@@ -23,7 +23,7 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.22'
-        cache: 'modules'
+        cache: true  # Изменено на логическое значение
 
     - name: Install dependencies
       run: go mod download
@@ -58,7 +58,7 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         version: latest
-        skip-cache: true
+        skip-cache: true  # Отключаем кэширование
       env:
         GO111MODULE: 'on'
         GOPROXY: 'https://proxy.golang.org,direct'
