@@ -31,19 +31,18 @@ jobs:
 
     - name: Cache Go modules
       uses: actions/cache@v3
+      env:
+        TAR_OPTIONS: --overwrite
       with:
         path: |
           ~/.cache/go-build
           ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}-${{ github.sha }}
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
 
     - name: Install dependencies
       run: go mod download
-
-    - name: Update Go dependencies
-      run: go get -u ./...
 
     - name: Install SQLite3
       run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
@@ -83,7 +82,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     - name: Build and push Docker image
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/new-feature'
+      if: github.ref_name == 'main' || github.ref_name == 'new-feature'
       run: |
         docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/go_final_project:latest .
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/go_final_project:latest
