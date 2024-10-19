@@ -51,7 +51,7 @@ jobs:
       env:
         TODO_PORT: 7540
         TODO_DBFILE: ${{ github.workspace }}/scheduler.db
-        TODO_PASSWORD: ${{ secrets.TODO_PASSWORD }}
+        TODO_PASSWORD: ""
       run: |
         nohup ./app &
         sleep 10
@@ -59,7 +59,7 @@ jobs:
     - name: Run tests
       env:
         TODO_DBFILE: ${{ github.workspace }}/scheduler.db
-        TODO_PASSWORD: ${{ secrets.TODO_PASSWORD }}
+        TODO_PASSWORD: ""  # Оставляем пустым для тестов без пароля
       run: |
         go test -v ./...
 

@@ -13,4 +13,11 @@ var DBFile = func() string {
 
 var FullNextDate = true
 var Search = true
-var Token = os.Getenv("TOKEN")
+
+// Проверяем наличие токена в переменных окружения, если не найден, токен пустой
+var Token = func() string {
+	if envToken := os.Getenv("TOKEN"); envToken != "" {
+		return envToken
+	}
+	return ""
+}()
