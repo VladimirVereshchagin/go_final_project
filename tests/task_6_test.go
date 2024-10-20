@@ -28,10 +28,13 @@ func TestTask(t *testing.T) {
 
 	body, err := requestJSON("api/task", nil, http.MethodGet)
 	assert.NoError(t, err)
+
+	// Изменение: map[string]any вместо map[string]string, чтобы поддерживать любые типы значений в ответе
 	var m map[string]any
 	err = json.Unmarshal(body, &m)
 	assert.NoError(t, err)
 
+	// Изменение: ожидается наличие ошибки вместо проверки её отсутствия (assert.True вместо assert.False)
 	_, ok := m["error"]
 	assert.True(t, ok, "Ожидается ошибка при отсутствии ID")
 
@@ -87,6 +90,7 @@ func TestEditTask(t *testing.T) {
 		}, http.MethodPut)
 		assert.NoError(t, err)
 
+		// Изменение: assert.True вместо assert.False для проверки наличия ошибки
 		errVal, ok := m["error"]
 		assert.True(t, ok && len(fmt.Sprint(errVal)) > 0, "Ожидается ошибка для значения %v", v)
 	}
@@ -95,6 +99,7 @@ func TestEditTask(t *testing.T) {
 		mupd, err := postJSON("api/task", newVals, http.MethodPut)
 		assert.NoError(t, err)
 
+		// Изменение: проверка ошибки с выводом при её наличии
 		if errVal, ok := mupd["error"]; ok && fmt.Sprint(errVal) != "" {
 			t.Errorf("Неожиданная ошибка: %v", errVal)
 			return
@@ -114,6 +119,7 @@ func TestEditTask(t *testing.T) {
 		}
 		assert.Equal(t, newVals["comment"], task.Comment)
 		assert.Equal(t, newVals["repeat"], task.Repeat)
+
 		now := time.Now().Format(`20060102`)
 		if task.Date < now {
 			t.Errorf("Дата не может быть меньше сегодняшней")

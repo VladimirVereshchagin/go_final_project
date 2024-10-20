@@ -63,7 +63,7 @@ func (a *App) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]interface{}{
+	response := map[string]any{
 		"id": id,
 	}
 	encoder := json.NewEncoder(w)
@@ -180,7 +180,7 @@ func (a *App) handleTasks(w http.ResponseWriter, r *http.Request) {
 		tasks = []*models.Task{}
 	}
 
-	response := map[string]interface{}{
+	response := map[string]any{
 		"tasks": tasks,
 	}
 
@@ -288,7 +288,7 @@ func (a *App) handleSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]interface{}{
+	response := map[string]any{
 		"token": tokenString,
 	}
 	encoder := json.NewEncoder(w)

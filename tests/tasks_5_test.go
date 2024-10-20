@@ -26,6 +26,7 @@ func addTask(t *testing.T, task task) string {
 
 func getTasks(t *testing.T, search string) []map[string]string {
 	url := "api/tasks"
+	// Добавлена проверка на длину строки поиска, чтобы избежать добавления пустого значения к URL
 	if Search && len(search) > 0 {
 		url += "?search=" + search
 	}
