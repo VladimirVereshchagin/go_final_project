@@ -82,12 +82,23 @@ http://localhost:7540/login.html
 
 ## Быстрый запуск через Docker Hub
 
-Для быстрого развёртывания приложения можно использовать готовый Docker-образ, доступный на [Docker Hub](https://hub.docker.com/r/vladimirvereschagin/go_final_project).
+Для быстрого развёртывания приложения можно использовать готовый Docker-образ, доступный на [Docker Hub](https://hub.docker.com/r/vladimirvereschagin/go_final_project). Образ поддерживает архитектуры `linux/amd64` и `linux/arm64`, что позволяет запускать его на различных платформах.
 
 ### Запуск контейнера
 
+### Важно
+
+Перед запуском контейнера убедитесь, что указали правильный пароль в переменной окружения `TODO_PASSWORD`, или оставьте её пустой, если хотите запустить приложение без пароля. Эти значения должны совпадать с теми, что указаны в файле `.env`. Это необходимо для корректной авторизации в приложении.
+
 ```bash
-docker run -d   -p 7540:7540   --name go_final_project   --env TODO_PORT=7540   --env TODO_DBFILE=scheduler.db   --env TODO_PASSWORD=your_password_here   -v $(pwd)/scheduler.db:/app/scheduler.db   vladimirvereschagin/go_final_project:latest
+docker run -d \
+  -p 7540:7540 \
+  --name go_final_project \
+  --env TODO_PORT=7540 \
+  --env TODO_DBFILE=scheduler.db \
+  --env TODO_PASSWORD=your_password_here \
+  -v $(pwd)/scheduler.db:/app/scheduler.db \
+  vladimirvereschagin/go_final_project:latest
 ```
 
 ### Пояснения
@@ -95,7 +106,7 @@ docker run -d   -p 7540:7540   --name go_final_project   --env TODO_PORT=7540   
 - `-p 7540:7540` — проброс порта 7540 для доступа к приложению по адресу `http://localhost:7540/`.
 - `--env TODO_PORT=7540` — указываем порт приложения.
 - `--env TODO_DBFILE=scheduler.db` — подключаем файл базы данных.
-- `--env TODO_PASSWORD=your_password_here` — задаём пароль для входа в приложение.
+- `--env TODO_PASSWORD=your_password_here` — задаём пароль для входа в приложение (или оставляем пустым для запуска без пароля).
 - `-v $(pwd)/scheduler.db:/app/scheduler.db` — монтируем базу данных на хосте для сохранения данных вне контейнера.
 
 ### Доступ через браузер
