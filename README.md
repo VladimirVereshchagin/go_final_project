@@ -87,7 +87,7 @@ http://localhost:7540/login.html
 ### Запуск контейнера
 
 ```bash
-docker run -d   -p 7540:7540   --name go_final_project   --env TODO_PORT=7540   --env TODO_DBFILE=scheduler.db   --env TODO_PASSWORD=your_password_here   -v $(pwd)/scheduler.db:/app/scheduler.db   vladimirvereshchagin/go_final_project:latest
+docker run -d   -p 7540:7540   --name go_final_project   --env TODO_PORT=7540   --env TODO_DBFILE=scheduler.db   --env TODO_PASSWORD=your_password_here   -v $(pwd)/scheduler.db:/app/scheduler.db   vladimirvereschagin/go_final_project:latest
 ```
 
 ### Пояснения
