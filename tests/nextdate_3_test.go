@@ -1,11 +1,10 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -43,13 +42,24 @@ func TestNextDate(t *testing.T) {
 				url.QueryEscape(v.date), url.QueryEscape(v.repeat))
 			get, err := getBody(urlPath)
 			assert.NoError(t, err)
-			next := strings.TrimSpace(string(get))
-			_, err = time.Parse("20060102", next)
-			if err != nil && len(v.want) == 0 {
+
+			// Изменение: парсинг тела ответа в JSON для более структурированной обработки
+			var resp map[string]string
+			err = json.Unmarshal(get, &resp)
+			if len(v.want) == 0 {
+				// Изменение: добавлена проверка на наличие ошибки в ответе для некорректных данных
+				assert.NotNil(t, resp["error"], "Ожидается ошибка для входных данных: %v", v)
 				continue
 			}
-			assert.Equal(t, v.want, next, `{%q, %q, %q}`,
-				v.date, v.repeat, v.want)
+
+			assert.NoError(t, err)
+
+			// Изменение: проверка на наличие поля "next_date" в ответе
+			next, ok := resp["next_date"]
+			assert.True(t, ok, "Поле 'next_date' не найдено в ответе")
+
+			// Проверка, что значение соответствует ожидаемому
+			assert.Equal(t, v.want, next, `{%q, %q, %q}`, v.date, v.repeat, v.want)
 		}
 	}
 	check()

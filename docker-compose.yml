@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${TODO_PORT:-7540}:7540"
+    env_file:
+      - .env
+    volumes:
+      - ./scheduler.db:/app/scheduler.db
+      - ./web:/app/web
+    restart: unless-stopped
