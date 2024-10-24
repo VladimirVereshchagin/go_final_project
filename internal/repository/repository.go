@@ -53,9 +53,10 @@ func NewDB(dbPath string) (*sqlx.DB, error) {
 		log.Println("Файл базы данных не найден. Создание новой базы.")
 	}
 
-	// Открываем базу данных
-	db, err := sqlx.Open("sqlite", dbPath)
+	// Открываем базу данных с указанием режима создания
+	db, err := sqlx.Open("sqlite", fmt.Sprintf("file:%s?mode=rwc", dbPath))
 	if err != nil {
+		log.Fatalf("Ошибка открытия базы данных: %v", err)
 		return nil, err
 	}
 

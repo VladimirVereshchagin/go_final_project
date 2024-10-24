@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -29,7 +30,7 @@ func openDB(t *testing.T) *sqlx.DB {
 	if len(envFile) > 0 {
 		dbfile = envFile
 	}
-	db, err := sqlx.Connect("sqlite", dbfile)
+	db, err := sqlx.Connect("sqlite", fmt.Sprintf("file:%s?mode=rwc", dbfile))
 	assert.NoError(t, err)
 	return db
 }
