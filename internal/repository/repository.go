@@ -9,7 +9,7 @@ import (
 
 	"github.com/VladimirVereshchagin/go_final_project/internal/models"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3" // Импорт для SQLite драйвера
+	_ "modernc.org/sqlite"
 )
 
 // TaskRepository - интерфейс для работы с задачами
@@ -54,7 +54,7 @@ func NewDB(dbPath string) (*sqlx.DB, error) {
 	}
 
 	// Открываем базу данных
-	db, err := sqlx.Open("sqlite3", dbPath)
+	db, err := sqlx.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, err
 	}

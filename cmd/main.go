@@ -9,7 +9,7 @@ import (
 	"github.com/VladimirVereshchagin/go_final_project/internal/repository"
 	"github.com/VladimirVereshchagin/go_final_project/internal/services"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func main() {
