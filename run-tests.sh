@@ -45,3 +45,9 @@ echo "Приложение остановлено. PID: $APP_PID"
 
 # Очистка временных файлов
 rm -f nohup.out cookies.txt
+
+# Удаление базы данных после тестов
+if [[ -f "scheduler.db" ]]; then
+    rm "scheduler.db"
+    echo "База данных scheduler.db удалена."
+fi
