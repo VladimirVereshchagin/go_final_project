@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+set +m
 
 # Установить переменную TODO_PASSWORD, если она не установлена
 export TODO_PASSWORD=${TODO_PASSWORD:-""}
@@ -9,7 +10,7 @@ nohup ./app &> nohup.out &
 APP_PID=$! # Сохраняем PID приложения
 
 # Подождем немного, чтобы приложение успело запуститься
-sleep 5
+sleep 10
 
 # Проверяем, что приложение запущено
 if ps -p $APP_PID > /dev/null; then
@@ -39,6 +40,7 @@ fi
 
 # Остановка приложения
 kill $APP_PID >/dev/null 2>&1 || true
+wait $APP_PID 2>/dev/null || true
 echo "Приложение остановлено. PID: $APP_PID"
 
 # Очистка временных файлов
