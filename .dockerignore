@@ -42,3 +42,6 @@ scheduler.db
 # Временные файлы
 cookies.txt
 nohup.out
+
+# Тестовая база данных
+test_scheduler.db

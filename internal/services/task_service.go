@@ -6,8 +6,11 @@ import (
 
 	"github.com/VladimirVereshchagin/go_final_project/internal/models"
 	"github.com/VladimirVereshchagin/go_final_project/internal/repository"
-	"github.com/VladimirVereshchagin/go_final_project/internal/utils"
+	"github.com/VladimirVereshchagin/go_final_project/internal/timeutils"
 )
+
+// Константа для формата даты
+const dateFormat = "20060102"
 
 // TaskService предоставляет интерфейс для работы с задачами.
 type TaskService interface {
@@ -36,30 +39,30 @@ func (s *taskService) CreateTask(task *models.Task) (string, error) {
 	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(dateFormat)
 	}
 
-	dateParsed, err := time.Parse("20060102", task.Date)
+	dateParsed, err := time.Parse(dateFormat, task.Date)
 	if err != nil {
 		return "", errors.New("некорректный формат даты")
 	}
 	dateParsed = time.Date(dateParsed.Year(), dateParsed.Month(), dateParsed.Day(), 0, 0, 0, 0, time.UTC)
 
 	if task.Repeat != "" {
-		_, err := utils.NextDate(now, task.Date, task.Repeat)
+		_, err := timeutils.NextDate(now, task.Date, task.Repeat)
 		if err != nil {
 			return "", errors.New("некорректное правило повторения")
 		}
 
 		if dateParsed.Before(now) {
-			nextDate, err := utils.NextDate(now, task.Date, task.Repeat)
+			nextDate, err := timeutils.NextDate(now, task.Date, task.Repeat)
 			if err != nil {
 				return "", errors.New("некорректное правило повторения")
 			}
 			task.Date = nextDate
 		}
 	} else if dateParsed.Before(now) {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(dateFormat)
 	}
 
 	return s.repo.Create(task)
@@ -80,29 +83,29 @@ func (s *taskService) UpdateTask(task *models.Task) error {
 	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 
 	if task.Date == "" {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(dateFormat)
 	}
 
-	dateParsed, err := time.Parse("20060102", task.Date)
+	dateParsed, err := time.Parse(dateFormat, task.Date)
 	if err != nil {
 		return errors.New("некорректный формат даты")
 	}
 
 	if task.Repeat != "" {
-		_, err := utils.NextDate(now, task.Date, task.Repeat)
+		_, err := timeutils.NextDate(now, task.Date, task.Repeat)
 		if err != nil {
 			return errors.New("некорректное правило повторения")
 		}
 
 		if dateParsed.Before(now) {
-			nextDate, err := utils.NextDate(now, task.Date, task.Repeat)
+			nextDate, err := timeutils.NextDate(now, task.Date, task.Repeat)
 			if err != nil {
 				return errors.New("некорректное правило повторения")
 			}
 			task.Date = nextDate
 		}
 	} else if dateParsed.Before(now) {
-		task.Date = now.Format("20060102")
+		task.Date = now.Format(dateFormat)
 	}
 
 	return s.repo.Update(task)
@@ -139,7 +142,7 @@ func (s *taskService) MarkTaskDone(id string) error {
 	now := time.Now().UTC()
 	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 
-	nextDate, err := utils.NextDate(now, task.Date, task.Repeat)
+	nextDate, err := timeutils.NextDate(now, task.Date, task.Repeat)
 	if err != nil {
 		return err
 	}
@@ -154,10 +157,10 @@ func (s *taskService) CalculateNextDate(nowStr, dateStr, repeat string) (string,
 		return "", errors.New("отсутствуют параметры")
 	}
 
-	now, err := time.Parse("20060102", nowStr)
+	now, err := time.Parse(dateFormat, nowStr)
 	if err != nil {
 		return "", errors.New("некорректный параметр 'now'")
 	}
 
-	return utils.NextDate(now, dateStr, repeat)
+	return timeutils.NextDate(now, dateStr, repeat)
 }

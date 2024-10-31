@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/VladimirVereshchagin/go_final_project/internal/auth"
 	"github.com/VladimirVereshchagin/go_final_project/internal/config"
-	"github.com/VladimirVereshchagin/go_final_project/internal/utils"
 )
 
 // Auth - проверка аутентификации
@@ -26,7 +26,7 @@ func Auth(next http.HandlerFunc, cfg *config.Config) http.HandlerFunc {
 		}
 
 		// Проверяем токен
-		_, err = utils.ParseToken(cookie.Value, pass)
+		_, err = auth.ParseToken(cookie.Value, pass)
 		if err != nil {
 			// Токен недействителен
 			http.Error(w, "Требуется аутентификация", http.StatusUnauthorized)

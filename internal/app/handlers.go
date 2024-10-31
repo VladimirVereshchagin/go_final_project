@@ -5,9 +5,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/VladimirVereshchagin/go_final_project/internal/auth"
 	"github.com/VladimirVereshchagin/go_final_project/internal/models"
-	"github.com/VladimirVereshchagin/go_final_project/internal/utils"
 )
+
+const defaultLimit = 50 // Значение лимита по умолчанию
 
 // writeJSONError отправляет ошибку в формате JSON с заданным статус-кодом
 func writeJSONError(w http.ResponseWriter, statusCode int, message string) {
@@ -167,7 +169,7 @@ func (a *App) handleTasks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	search := r.URL.Query().Get("search")
-	limit := 50
+	limit := defaultLimit
 
 	tasks, err := a.TaskService.ListTasks(search, limit)
 	if err != nil {
@@ -281,7 +283,7 @@ func (a *App) handleSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenString, err := utils.GenerateToken(pass)
+	tokenString, err := auth.GenerateToken(pass)
 	if err != nil {
 		log.Println("Ошибка генерации JWT токена:", err)
 		writeJSONError(w, http.StatusInternalServerError, "Ошибка генерации токена")

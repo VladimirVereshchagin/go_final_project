@@ -12,6 +12,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+const defaultLimit = 50 // Значение лимита по умолчанию
+
 // TaskRepository - интерфейс для работы с задачами
 type TaskRepository interface {
 	Create(task *models.Task) (string, error)
@@ -173,51 +175,49 @@ func (r *taskRepository) List(search string, limit int) ([]*models.Task, error) 
 	var tasks []*models.Task
 	var err error
 	var rows *sqlx.Rows
+	var query string
 
-	if search == "" {
-		// Запрос задач без фильтрации
-		query := `
+	if limit == 0 {
+		limit = defaultLimit
+	}
+
+	params := map[string]interface{}{
+		"limit": limit,
+	}
+
+	switch {
+	case search == "":
+		// Запрос без фильтрации
+		query = `
             SELECT id, date, title, comment, repeat
             FROM scheduler
             ORDER BY date ASC
             LIMIT :limit
         `
-		rows, err = r.db.NamedQuery(query, map[string]interface{}{
-			"limit": limit,
-		})
-	} else {
-		date, parseErr := parseDate(search)
-		if parseErr == nil {
-			// Фильтрация по дате
-			dateStr := date.Format("20060102")
-			query := `
-                SELECT id, date, title, comment, repeat
-                FROM scheduler
-                WHERE date = :date
-                ORDER BY date ASC
-                LIMIT :limit
-            `
-			rows, err = r.db.NamedQuery(query, map[string]interface{}{
-				"date":  dateStr,
-				"limit": limit,
-			})
-		} else {
-			// Фильтрация по заголовку или комментарию
-			searchPattern := "%" + search + "%"
-			query := `
-                SELECT id, date, title, comment, repeat
-                FROM scheduler
-                WHERE title LIKE :search OR comment LIKE :search
-                ORDER BY date ASC
-                LIMIT :limit
-            `
-			rows, err = r.db.NamedQuery(query, map[string]interface{}{
-				"search": searchPattern,
-				"limit":  limit,
-			})
-		}
+	case isValidDate(search):
+		// Фильтрация по дате
+		date, _ := parseDate(search)
+		params["date"] = date.Format("20060102")
+		query = `
+            SELECT id, date, title, comment, repeat
+            FROM scheduler
+            WHERE date = :date
+            ORDER BY date ASC
+            LIMIT :limit
+        `
+	default:
+		// Фильтрация по заголовку или комментарию (нечувствительная к регистру)
+		params["search"] = "%" + search + "%"
+		query = `
+			SELECT id, date, title, comment, repeat
+			FROM scheduler
+			WHERE title LIKE :search COLLATE NOCASE OR comment LIKE :search COLLATE NOCASE
+			ORDER BY date ASC
+			LIMIT :limit
+		`
 	}
 
+	rows, err = r.db.NamedQuery(query, params)
 	if err != nil {
 		return nil, err
 	}
@@ -243,4 +243,10 @@ func (r *taskRepository) List(search string, limit int) ([]*models.Task, error) 
 // parseDate - парсит дату в формате "дд.мм.гггг"
 func parseDate(dateStr string) (time.Time, error) {
 	return time.Parse("02.01.2006", dateStr)
+}
+
+// isValidDate - проверяет, является ли строка датой в формате "дд.мм.гггг"
+func isValidDate(dateStr string) bool {
+	_, err := parseDate(dateStr)
+	return err == nil
 }

@@ -2,9 +2,10 @@ repos:
   - repo: local
     hooks:
       - id: go-vet
-        name: Custom Go Vet
-        entry: ./vet.sh
-        language: script
+        name: Go Vet
+        entry: |
+          bash -c "go vet ./cmd/... && go vet ./internal/... && go vet ./tests/..."
+        language: system
         files: \.go$
   - repo: https://github.com/golangci/golangci-lint
     rev: v1.61.0

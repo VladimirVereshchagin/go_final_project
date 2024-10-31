@@ -46,3 +46,6 @@ go_final_project
 # Временные файлы
 cookies.txt
 nohup.out
+
+# Тестовая база данных
+test_scheduler.db
