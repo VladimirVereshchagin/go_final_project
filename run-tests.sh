@@ -4,6 +4,10 @@ set +m
 
 # Установить переменную TODO_PASSWORD, если она не установлена
 export TODO_PASSWORD=${TODO_PASSWORD:-""}
+export TODO_DBFILE="$(pwd)/test_data/test_scheduler.db"
+
+# Создаём директорию для тестовой базы данных
+mkdir -p test_data
 
 # Запуск приложения в фоне
 nohup ./app &> nohup.out &
@@ -46,8 +50,11 @@ echo "Приложение остановлено. PID: $APP_PID"
 # Очистка временных файлов
 rm -f nohup.out cookies.txt
 
-# Удаление базы данных после тестов
-if [[ -f "scheduler.db" ]]; then
-    rm "scheduler.db"
-    echo "База данных scheduler.db удалена."
+# Удаление тестовой базы данных после тестов
+if [[ -f "$TODO_DBFILE" ]]; then
+    rm "$TODO_DBFILE"
+    echo "Тестовая база данных $TODO_DBFILE удалена."
 fi
+
+# Удаляем директорию для тестовой базы данных, если она пуста
+rmdir test_data 2>/dev/null || true

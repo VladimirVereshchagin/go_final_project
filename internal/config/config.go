@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -33,9 +34,16 @@ func LoadConfig() *Config {
 		log.Println("Внимание: Пароль для авторизации не задан. Доступ будет без аутентификации")
 	}
 
+	dbFile := getEnv("TODO_DBFILE", "data/scheduler.db")
+	// Создаём директорию для базы данных, если её нет
+	err = os.MkdirAll(filepath.Dir(dbFile), os.ModePerm)
+	if err != nil {
+		log.Fatalf("Ошибка создания директории для базы данных: %v", err)
+	}
+
 	return &Config{
 		Port:     port,
-		DBFile:   getEnv("TODO_DBFILE", "data/scheduler.db"),
+		DBFile:   dbFile,
 		Password: password,
 	}
 }

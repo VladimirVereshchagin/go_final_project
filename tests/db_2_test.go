@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -21,17 +21,40 @@ type Task struct {
 
 func count(db *sqlx.DB) (int, error) {
 	var count int
-	return count, db.Get(&count, `SELECT count(id) FROM scheduler`)
+	err := db.Get(&count, `SELECT count(id) FROM scheduler`)
+	return count, err
 }
 
 func openDB(t *testing.T) *sqlx.DB {
-	dbfile := DBFile
-	envFile := os.Getenv("TODO_DBFILE")
-	if len(envFile) > 0 {
-		dbfile = envFile
+	dbfile := os.Getenv("TODO_DBFILE")
+	if dbfile == "" {
+		dbfile = "data/scheduler.db" // или путь по умолчанию
 	}
-	db, err := sqlx.Connect("sqlite", fmt.Sprintf("file:%s?mode=rwc", dbfile))
-	assert.NoError(t, err)
+
+	// Преобразуем путь к базе данных в абсолютный
+	absDBPath, err := filepath.Abs(dbfile)
+	if err != nil {
+		t.Fatalf("Не удалось получить абсолютный путь к базе данных: %v", err)
+	}
+
+	// Создаём директорию, если её нет
+	dir := filepath.Dir(absDBPath)
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		t.Fatalf("Не удалось создать директорию для базы данных: %v", err)
+	}
+
+	// Открываем базу данных
+	db, err := sqlx.Open("sqlite", absDBPath)
+	if err != nil {
+		t.Fatalf("Не удалось подключиться к базе данных: %v", err)
+	}
+
+	// Проверяем соединение
+	if err := db.Ping(); err != nil {
+		t.Fatalf("Ошибка соединения с базой данных: %v", err)
+	}
+
 	return db
 }
 
@@ -45,7 +68,7 @@ func TestDB(t *testing.T) {
 	today := time.Now().Format(`20060102`)
 
 	res, err := db.Exec(`INSERT INTO scheduler (date, title, comment, repeat)
-    VALUES (?, 'Todo', 'Комментарий', '')`, today)
+        VALUES (?, 'Todo', 'Комментарий', '')`, today)
 	assert.NoError(t, err)
 
 	id, err := res.LastInsertId()
