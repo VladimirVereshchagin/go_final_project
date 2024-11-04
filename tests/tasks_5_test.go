@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	_ "modernc.org/sqlite"
 )
 
 func addTask(t *testing.T, task task) string {
@@ -26,7 +27,7 @@ func addTask(t *testing.T, task task) string {
 
 func getTasks(t *testing.T, search string) []map[string]string {
 	url := "api/tasks"
-	if Search {
+	if len(search) > 0 {
 		url += "?search=" + search
 	}
 	body, err := requestJSON(url, nil, http.MethodGet)
@@ -42,7 +43,6 @@ func TestTasks(t *testing.T) {
 	db := openDB(t)
 	defer db.Close()
 
-	now := time.Now()
 	_, err := db.Exec("DELETE FROM scheduler")
 	assert.NoError(t, err)
 
@@ -50,6 +50,7 @@ func TestTasks(t *testing.T) {
 	assert.NotNil(t, tasks)
 	assert.Empty(t, tasks)
 
+	now := time.Now()
 	addTask(t, task{
 		date:    now.Format(`20060102`),
 		title:   "Просмотр фильма",
@@ -71,7 +72,7 @@ func TestTasks(t *testing.T) {
 		repeat:  "d 30",
 	})
 	tasks = getTasks(t, "")
-	assert.Equal(t, len(tasks), 3)
+	assert.Equal(t, 3, len(tasks))
 
 	now = now.AddDate(0, 0, 2)
 	date = now.Format(`20060102`)
@@ -89,20 +90,16 @@ func TestTasks(t *testing.T) {
 	})
 	addTask(t, task{
 		date:    date,
-		title:   "Встретится с Васей",
+		title:   "Встретиться с Васей",
 		comment: "в 18:00",
 		repeat:  "",
 	})
 
 	tasks = getTasks(t, "")
-	assert.Equal(t, len(tasks), 6)
+	assert.Equal(t, 6, len(tasks))
 
-	if !Search {
-		return
-	}
 	tasks = getTasks(t, "УК")
-	assert.Equal(t, len(tasks), 1)
+	assert.Equal(t, 1, len(tasks))
 	tasks = getTasks(t, now.Format(`02.01.2006`))
-	assert.Equal(t, len(tasks), 3)
-
+	assert.Equal(t, 3, len(tasks))
 }

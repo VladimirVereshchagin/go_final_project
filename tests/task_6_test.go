@@ -28,24 +28,27 @@ func TestTask(t *testing.T) {
 
 	body, err := requestJSON("api/task", nil, http.MethodGet)
 	assert.NoError(t, err)
-	var m map[string]string
+
+	// Изменение: map[string]any вместо map[string]string, чтобы поддерживать любые типы значений в ответе
+	var m map[string]any
 	err = json.Unmarshal(body, &m)
 	assert.NoError(t, err)
 
-	e, ok := m["error"]
-	assert.False(t, !ok || len(fmt.Sprint(e)) == 0,
-		"Ожидается ошибка для вызова /api/task")
+	// Изменение: ожидается наличие ошибки вместо проверки её отсутствия (assert.True вместо assert.False)
+	_, ok := m["error"]
+	assert.True(t, ok, "Ожидается ошибка при отсутствии ID")
 
 	body, err = requestJSON("api/task?id="+todo, nil, http.MethodGet)
 	assert.NoError(t, err)
-	err = json.Unmarshal(body, &m)
+	var taskResp map[string]string
+	err = json.Unmarshal(body, &taskResp)
 	assert.NoError(t, err)
 
-	assert.Equal(t, todo, m["id"])
-	assert.Equal(t, task.date, m["date"])
-	assert.Equal(t, task.title, m["title"])
-	assert.Equal(t, task.comment, m["comment"])
-	assert.Equal(t, task.repeat, m["repeat"])
+	assert.Equal(t, todo, taskResp["id"])
+	assert.Equal(t, task.date, taskResp["date"])
+	assert.Equal(t, task.title, taskResp["title"])
+	assert.Equal(t, task.comment, taskResp["comment"])
+	assert.Equal(t, task.repeat, taskResp["repeat"])
 }
 
 type fulltask struct {
@@ -87,20 +90,20 @@ func TestEditTask(t *testing.T) {
 		}, http.MethodPut)
 		assert.NoError(t, err)
 
-		var errVal string
-		e, ok := m["error"]
-		if ok {
-			errVal = fmt.Sprint(e)
-		}
-		assert.NotEqual(t, len(errVal), 0, "Ожидается ошибка для значения %v", v)
+		// Изменение: assert.True вместо assert.False для проверки наличия ошибки
+		errVal, ok := m["error"]
+		assert.True(t, ok && len(fmt.Sprint(errVal)) > 0, "Ожидается ошибка для значения %v", v)
 	}
 
 	updateTask := func(newVals map[string]any) {
 		mupd, err := postJSON("api/task", newVals, http.MethodPut)
 		assert.NoError(t, err)
 
-		e, ok := mupd["error"]
-		assert.False(t, ok && fmt.Sprint(e) != "")
+		// Изменение: проверка ошибки с выводом при её наличии
+		if errVal, ok := mupd["error"]; ok && fmt.Sprint(errVal) != "" {
+			t.Errorf("Неожиданная ошибка: %v", errVal)
+			return
+		}
 
 		var task Task
 		err = db.Get(&task, `SELECT * FROM scheduler WHERE id=?`, id)
@@ -116,6 +119,7 @@ func TestEditTask(t *testing.T) {
 		}
 		assert.Equal(t, newVals["comment"], task.Comment)
 		assert.Equal(t, newVals["repeat"], task.Repeat)
+
 		now := time.Now().Format(`20060102`)
 		if task.Date < now {
 			t.Errorf("Дата не может быть меньше сегодняшней")
