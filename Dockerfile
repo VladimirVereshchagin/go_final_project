@@ -26,7 +26,7 @@ COPY . .
 RUN go build -o app ./cmd
 
 # Финальный этап
-FROM --platform=$TARGETPLATFORM ubuntu:22.04
+FROM ubuntu:22.04
 
 # Устанавливаем рабочую директорию для финального контейнера
 WORKDIR /app
