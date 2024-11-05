@@ -3,9 +3,9 @@ package app
 import (
 	"net/http"
 
-	"github.com/VladimirVereshchagin/go_final_project/internal/app/middleware"
-	"github.com/VladimirVereshchagin/go_final_project/internal/config"
-	"github.com/VladimirVereshchagin/go_final_project/internal/services"
+	"github.com/VladimirVereshchagin/scheduler/internal/app/middleware"
+	"github.com/VladimirVereshchagin/scheduler/internal/config"
+	"github.com/VladimirVereshchagin/scheduler/internal/services"
 )
 
 // App представляет структуру приложения с его настройками и зависимостями

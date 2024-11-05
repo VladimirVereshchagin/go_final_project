@@ -1,10 +1,10 @@
-module github.com/VladimirVereshchagin/go_final_project
+module github.com/VladimirVereshchagin/scheduler
 
 go 1.22.0
 
 toolchain go1.23.2
 
-replace github.com/VladimirVereshchagin/go_final_project => ./
+replace github.com/VladimirVereshchagin/scheduler => ./
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.2.1

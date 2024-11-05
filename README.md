@@ -1,14 +1,14 @@
 
-# go_final_project
+# scheduler
 
 ## Описание проекта
 
-**go_final_project** — это веб-приложение для планирования задач, разработанное на языке Go. Приложение позволяет пользователям создавать, просматривать, редактировать и удалять задачи, а также отмечать их как выполненные. В качестве базы данных используется **SQLite** с чисто Go-драйвером [`modernc.org/sqlite`](https://gitlab.com/cznic/sqlite), что упрощает сборку и развёртывание приложения на разных архитектурах. Приложение предоставляет RESTful API и включает фронтенд для удобного взаимодействия.
+**scheduler** — это веб-приложение для планирования задач, разработанное на языке Go. Приложение позволяет пользователям создавать, просматривать, редактировать и удалять задачи, а также отмечать их как выполненные. В качестве базы данных используется **SQLite** с чисто Go-драйвером [`modernc.org/sqlite`](https://gitlab.com/cznic/sqlite), что упрощает сборку и развёртывание приложения на разных архитектурах. Приложение предоставляет RESTful API и включает фронтенд для удобного взаимодействия.
 
 ### Реализованны все задания со звёздочкой, включая
 
 - **Аутентификация:** Реализован механизм аутентификации с использованием JWT-токенов. Доступ к приложению защищён паролем, который задаётся через переменную окружения `TODO_PASSWORD`.
-- **Создание Docker-образа:** Разработан `Dockerfile` для сборки Docker-образа приложения, что упрощает его развёртывание и масштабирование. Готовый образ доступен на [Docker Hub](https://hub.docker.com/r/vladimirvereschagin/go_final_project).
+- **Создание Docker-образа:** Разработан `Dockerfile` для сборки Docker-образа приложения, что упрощает его развёртывание и масштабирование. Готовый образ доступен на [Docker Hub](https://hub.docker.com/r/vladimirvereschagin/scheduler).
 - **Кросс-компиляция и поддержка нескольких архитектур:** Благодаря использованию чисто Go-драйвера для SQLite, приложение поддерживает кросс-компиляцию и сборку мультиархитектурных Docker-образов, что позволяет запускать его на различных платформах, включая `linux/amd64` и `linux/arm64`.
 
 ## Требования
@@ -22,8 +22,8 @@
 ### Клонирование репозитория
 
 ```bash
-git clone https://github.com/VladimirVereshchagin/go_final_project.git
-cd go_final_project
+git clone https://github.com/VladimirVereshchagin/scheduler.git
+cd scheduler
 ```
 
 ### Настройка переменных окружения
@@ -80,7 +80,7 @@ http://localhost:7540/login.html
 
 ## Быстрый запуск через Docker Hub
 
-Для быстрого развёртывания приложения можно использовать готовый Docker-образ, доступный на [Docker Hub](https://hub.docker.com/r/vladimirvereschagin/go_final_project). Образ поддерживает архитектуры `linux/amd64` и `linux/arm64`, что позволяет запускать его на различных платформах.
+Для быстрого развёртывания приложения можно использовать готовый Docker-образ, доступный на [Docker Hub](https://hub.docker.com/r/vladimirvereschagin/scheduler). Образ поддерживает архитектуры `linux/amd64` и `linux/arm64`, что позволяет запускать его на различных платформах.
 
 ### Запуск контейнера
 
@@ -92,12 +92,12 @@ http://localhost:7540/login.html
 ```bash
 docker run -d \
   -p 7540:7540 \
-  --name go_final_project \
+  --name scheduler \
   --env TODO_PORT=7540 \
   --env TODO_DBFILE=data/scheduler.db \
   --env TODO_PASSWORD=your_password_here \
   -v $(pwd)/data:/app/data \
-  vladimirvereschagin/go_final_project:latest
+  vladimirvereschagin/scheduler:latest
 ```
 
 ### Пояснения
@@ -121,8 +121,8 @@ http://localhost:7540/
 Чтобы остановить и удалить контейнер, выполните следующие команды:
 
 ```bash
-docker stop go_final_project
-docker rm go_final_project
+docker stop scheduler
+docker rm scheduler
 ```
 
 ## Запуск тестов
@@ -199,7 +199,7 @@ pre-commit run --all-files --verbose
 
 ## Обратная связь
 
-Если у вас есть вопросы или предложения, пожалуйста, создайте [issue](https://github.com/VladimirVereshchagin/go_final_project/issues) или [pull request](https://github.com/VladimirVereshchagin/go_final_project/pulls) в репозитории проекта.
+Если у вас есть вопросы или предложения, пожалуйста, создайте [issue](https://github.com/VladimirVereshchagin/scheduler/issues) или [pull request](https://github.com/VladimirVereshchagin/scheduler/pulls) в репозитории проекта.
 
 ## Лицензия
 

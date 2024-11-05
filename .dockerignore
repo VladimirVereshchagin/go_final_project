@@ -1,5 +1,5 @@
 # Игнорируем бинарные файлы
-go_final_project
+scheduler
 *.exe
 *.dll
 *.so

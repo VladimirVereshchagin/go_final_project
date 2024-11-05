@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/VladimirVereshchagin/go_final_project/internal/auth"
-	"github.com/VladimirVereshchagin/go_final_project/internal/models"
+	"github.com/VladimirVereshchagin/scheduler/internal/auth"
+	"github.com/VladimirVereshchagin/scheduler/internal/models"
 )
 
 const defaultLimit = 50 // Значение лимита по умолчанию

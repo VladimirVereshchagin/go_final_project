@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/VladimirVereshchagin/go_final_project/internal/app"
-	"github.com/VladimirVereshchagin/go_final_project/internal/config"
-	"github.com/VladimirVereshchagin/go_final_project/internal/repository"
-	"github.com/VladimirVereshchagin/go_final_project/internal/services"
+	"github.com/VladimirVereshchagin/scheduler/internal/app"
+	"github.com/VladimirVereshchagin/scheduler/internal/config"
+	"github.com/VladimirVereshchagin/scheduler/internal/repository"
+	"github.com/VladimirVereshchagin/scheduler/internal/services"
 
 	_ "modernc.org/sqlite"
 )

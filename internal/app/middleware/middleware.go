@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/VladimirVereshchagin/go_final_project/internal/auth"
-	"github.com/VladimirVereshchagin/go_final_project/internal/config"
+	"github.com/VladimirVereshchagin/scheduler/internal/auth"
+	"github.com/VladimirVereshchagin/scheduler/internal/config"
 )
 
 // Auth - проверка аутентификации

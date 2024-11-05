@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VladimirVereshchagin/go_final_project/internal/models"
+	"github.com/VladimirVereshchagin/scheduler/internal/models"
 	"github.com/jmoiron/sqlx"
 	_ "modernc.org/sqlite"
 )

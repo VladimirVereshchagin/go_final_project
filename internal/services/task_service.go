@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/VladimirVereshchagin/go_final_project/internal/models"
-	"github.com/VladimirVereshchagin/go_final_project/internal/repository"
-	"github.com/VladimirVereshchagin/go_final_project/internal/timeutils"
+	"github.com/VladimirVereshchagin/scheduler/internal/models"
+	"github.com/VladimirVereshchagin/scheduler/internal/repository"
+	"github.com/VladimirVereshchagin/scheduler/internal/timeutils"
 )
 
 // Константа для формата даты

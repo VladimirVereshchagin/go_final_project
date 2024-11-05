@@ -41,7 +41,7 @@ testdata/
 *.a
 
 # Бинарный файл приложения
-go_final_project
+scheduler
 
 # Временные файлы
 cookies.txt
