@@ -1,6 +1,10 @@
 
 # scheduler
 
+![Build Status](https://github.com/VladimirVereshchagin/scheduler/workflows/Go%20CI/CD/badge.svg)
+![Go Version](https://img.shields.io/badge/go-1.22-blue)
+![Docker Image Size](https://img.shields.io/docker/image-size/vladimirvereschagin/scheduler/latest)
+
 [Docker Hub repository for scheduler](https://hub.docker.com/r/vladimirvereschagin/scheduler)
 
 ## Project Description
