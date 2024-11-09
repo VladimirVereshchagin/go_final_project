@@ -4,8 +4,10 @@
 ![Build Status](https://github.com/VladimirVereshchagin/scheduler/workflows/Go%20CI/CD/badge.svg)
 ![Go Version](https://img.shields.io/badge/go-1.22-blue)
 ![Docker Image Size](https://img.shields.io/docker/image-size/vladimirvereschagin/scheduler/latest)
+![GitHub Package Image Size](https://img.shields.io/github/v/release/VladimirVereshchagin/scheduler?label=GitHub%20Package)
 
-[Docker Hub repository for scheduler](https://hub.docker.com/r/vladimirvereschagin/scheduler)
+[Docker Hub repository for scheduler](https://hub.docker.com/r/vladimirvereschagin/scheduler)  
+[GitHub Packages for scheduler](https://github.com/VladimirVereshchagin/scheduler/packages)
 
 ## Project Description
 
@@ -103,6 +105,21 @@ docker run -d \
   --env TODO_PASSWORD=your_password_here \
   -v $(pwd)/data:/app/data \
   vladimirvereschagin/scheduler:latest
+```
+
+### Quick Start via GitHub Packages
+
+Alternatively, you can deploy the application using the image from **GitHub Packages**:
+
+```bash
+docker run -d \
+  -p 7540:7540 \
+  --name scheduler \
+  --env TODO_PORT=7540 \
+  --env TODO_DBFILE=data/scheduler.db \
+  --env TODO_PASSWORD=your_password_here \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/vladimirvereshchagin/scheduler:latest
 ```
 
 ### Explanation
