@@ -28,6 +28,10 @@ RUN go build -o app ./cmd
 # Финальный этап
 FROM ubuntu:22.04
 
+# Добавляем метаданные для образа
+LABEL org.opencontainers.image.source="https://github.com/VladimirVereshchagin/scheduler"
+LABEL maintainer="Vladimir Vereshchagin <vlvereschagin06@gmail.com>"
+
 # Устанавливаем рабочую директорию для финального контейнера
 WORKDIR /app
 
