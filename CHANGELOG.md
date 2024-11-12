@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Translated `README.md` to English.
 - Updated project structure; added templates for Pull Requests and Issues.
+- Changed all code comments and logs to English for consistency and readability.
 
 ### Bug Fixes
 

@@ -1,4 +1,4 @@
-# Бинарные файлы, которые будут созданы после компиляции
+# Binary files generated after compilation
 *.exe
 *.dll
 *.so
@@ -6,46 +6,46 @@
 *.test
 /app
 
-# Файлы логов
+# Log files
 *.log
 
-# Директории кэша и сборки
+# Cache and build directories
 build/
 tmp/
 *.out
 
-# Директории, связанные с модулями и зависимостями Go
+# Directories related to Go modules and dependencies
 vendor/
 .gopath/
 
-# Конфиденциальные данные и переменные окружения
+# Confidential data and environment variables
 .env
 .env.*
 
-# Исключаем .env.example, чтобы он был в репозитории
+# Include .env.example in the repository
 !.env.example
 
-# Настройки операционной системы
+# OS-specific settings
 .DS_Store
 
-# IDE и редакторы
+# IDE and editor files
 .idea/
 .vscode/
 
-# Файлы тестирования и покрытия
+# Testing and coverage files
 *.coverprofile
 testdata/
 
-# Скомпилированные файлы
+# Compiled files
 *.o
 *.a
 
-# Бинарный файл приложения
+# Application binary file
 scheduler
 
-# Временные файлы
+# Temporary files
 cookies.txt
 nohup.out
 
-# Тестовая база данных
+# Test database
 test_scheduler.db

@@ -7,33 +7,33 @@ import (
 	"github.com/VladimirVereshchagin/scheduler/internal/config"
 )
 
-// Auth - проверка аутентификации
+// Auth - authentication check
 func Auth(next http.HandlerFunc, cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		pass := cfg.Password
 		if pass == "" {
-			// Пароль не задан, пропускаем
+			// Password not set, skipping
 			next(w, r)
 			return
 		}
 
-		// Токен из куки
+		// Token from cookie
 		cookie, err := r.Cookie("token")
 		if err != nil {
-			// Нет токена, возвращаем 401
-			http.Error(w, "Требуется аутентификация", http.StatusUnauthorized)
+			// No token, return 401
+			http.Error(w, "Authentication required", http.StatusUnauthorized)
 			return
 		}
 
-		// Проверяем токен
+		// Validate token
 		_, err = auth.ParseToken(cookie.Value, pass)
 		if err != nil {
-			// Токен недействителен
-			http.Error(w, "Требуется аутентификация", http.StatusUnauthorized)
+			// Token is invalid
+			http.Error(w, "Authentication required", http.StatusUnauthorized)
 			return
 		}
 
-		// Токен валиден, продолжаем
+		// Token is valid, proceed
 		next(w, r)
 	}
 }

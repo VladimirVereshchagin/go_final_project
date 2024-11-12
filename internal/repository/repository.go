@@ -13,9 +13,9 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-const defaultLimit = 50 // Значение лимита по умолчанию
+const defaultLimit = 50 // Default limit value
 
-// TaskRepository - интерфейс для работы с задачами
+// TaskRepository - interface for task operations
 type TaskRepository interface {
 	Create(task *models.Task) (string, error)
 	GetByID(id string) (*models.Task, error)
@@ -24,71 +24,71 @@ type TaskRepository interface {
 	List(search string, limit int) ([]*models.Task, error)
 }
 
-// taskRepository - реализация интерфейса TaskRepository
+// taskRepository - implementation of the TaskRepository interface
 type taskRepository struct {
 	db *sqlx.DB
 }
 
-// NewTaskRepository - создаёт новый репозиторий задач
+// NewTaskRepository - creates a new task repository
 func NewTaskRepository(db *sqlx.DB) TaskRepository {
 	return &taskRepository{db: db}
 }
 
-// NewDB - открывает или создаёт новую базу данных
+// NewDB - opens or creates a new database
 func NewDB(dbPath string) (*sqlx.DB, error) {
-	// Если путь к базе не указан, используем путь по умолчанию
+	// If the database path is not provided, use the default path
 	if dbPath == "" {
 		dbPath = filepath.Join("data", "scheduler.db")
 	}
 
-	// Преобразуем путь к базе данных в абсолютный
+	// Convert the database path to an absolute path
 	absDBPath, err := filepath.Abs(dbPath)
 	if err != nil {
 		return nil, err
 	}
 	dbPath = absDBPath
 
-	// Создаём директорию, если её нет
+	// Create the directory if it does not exist
 	dir := filepath.Dir(dbPath)
 	err = os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
 
-	// Открываем базу данных
+	// Open the database
 	db, err := sqlx.Open("sqlite", dbPath)
 	if err != nil {
-		log.Printf("Ошибка открытия базы данных: %v", err)
+		log.Printf("Error opening database: %v", err)
 		return nil, err
 	}
 
-	// Проверяем соединение
+	// Check the connection
 	if err := db.Ping(); err != nil {
-		log.Printf("Ошибка соединения с базой данных: %v", err)
+		log.Printf("Error connecting to the database: %v", err)
 		return nil, err
 	}
 
-	// Проверяем наличие таблицы
+	// Check if the table exists
 	var exists int
 	err = db.Get(&exists, "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='scheduler'")
 	if err != nil || exists == 0 {
-		log.Println("Таблица scheduler не найдена. Создание новой таблицы.")
+		log.Println("Table 'scheduler' not found. Creating a new table.")
 		createTable(db)
 	} else {
-		log.Println("База данных и таблица scheduler уже существуют.")
+		log.Println("Database and 'scheduler' table already exist.")
 	}
 
-	// Логирование пути к файлу базы данных после создания таблицы
-	log.Printf("Используется файл базы данных: %s", dbPath)
+	// Log the database file path after creating the table
+	log.Printf("Using database file: %s", dbPath)
 
 	return db, nil
 }
 
-// createTable - создаёт таблицу задач, если её нет
+// createTable - creates the task table if it does not exist
 func createTable(db *sqlx.DB) {
-	log.Println("Создание таблицы scheduler...")
+	log.Println("Creating 'scheduler' table...")
 
-	// SQL-запрос для создания таблицы и индекса
+	// SQL query to create the table and index
 	query := `
         CREATE TABLE IF NOT EXISTS scheduler (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,12 +101,12 @@ func createTable(db *sqlx.DB) {
     `
 	_, err := db.Exec(query)
 	if err != nil {
-		log.Fatalf("Ошибка создания таблицы: %v", err)
+		log.Fatalf("Error creating table: %v", err)
 	}
-	log.Println("Таблица и индекс успешно созданы.")
+	log.Println("Table and index successfully created.")
 }
 
-// Create - добавляет новую задачу в базу данных
+// Create - adds a new task to the database
 func (r *taskRepository) Create(task *models.Task) (string, error) {
 	query := `
         INSERT INTO scheduler (date, title, comment, repeat)
@@ -117,7 +117,7 @@ func (r *taskRepository) Create(task *models.Task) (string, error) {
 		return "", err
 	}
 
-	// Получаем ID новой задачи
+	// Get the ID of the new task
 	id, err := res.LastInsertId()
 	if err != nil {
 		return "", err
@@ -126,7 +126,7 @@ func (r *taskRepository) Create(task *models.Task) (string, error) {
 	return fmt.Sprintf("%d", id), nil
 }
 
-// GetByID - получает задачу по её ID
+// GetByID - retrieves a task by its ID
 func (r *taskRepository) GetByID(id string) (*models.Task, error) {
 	var task models.Task
 	err := r.db.Get(&task, `SELECT id, date, title, comment, repeat FROM scheduler WHERE id = ?`, id)
@@ -137,7 +137,7 @@ func (r *taskRepository) GetByID(id string) (*models.Task, error) {
 	return &task, nil
 }
 
-// Update - обновляет задачу в базе данных
+// Update - updates a task in the database
 func (r *taskRepository) Update(task *models.Task) error {
 	query := `
         UPDATE scheduler
@@ -149,40 +149,40 @@ func (r *taskRepository) Update(task *models.Task) error {
 		return err
 	}
 
-	// Проверяем, обновлены ли строки
+	// Check if any rows were updated
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return err
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("задача не найдена")
+		return fmt.Errorf("task not found")
 	}
 
 	return nil
 }
 
-// Delete - удаляет задачу по её ID
+// Delete - deletes a task by its ID
 func (r *taskRepository) Delete(id string) error {
 	result, err := r.db.Exec(`DELETE FROM scheduler WHERE id = ?`, id)
 	if err != nil {
 		return err
 	}
 
-	// Проверяем, удалены ли строки
+	// Check if any rows were deleted
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return err
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("задача не найдена")
+		return fmt.Errorf("task not found")
 	}
 
 	return nil
 }
 
-// List - получает список задач, используя фильтрацию и ограничение
+// List - retrieves a list of tasks with filtering and limitation
 func (r *taskRepository) List(search string, limit int) ([]*models.Task, error) {
 	var tasks []*models.Task
 	var err error
@@ -199,7 +199,7 @@ func (r *taskRepository) List(search string, limit int) ([]*models.Task, error) 
 
 	switch {
 	case search == "":
-		// Запрос без фильтрации
+		// Query without filtering
 		query = `
             SELECT id, date, title, comment, repeat
             FROM scheduler
@@ -222,7 +222,7 @@ func (r *taskRepository) List(search string, limit int) ([]*models.Task, error) 
 		}
 
 	case isValidDate(search):
-		// Фильтрация по дате
+		// Filtering by date
 		date, _ := parseDate(search)
 		params["date"] = date.Format("20060102")
 		query = `
@@ -248,7 +248,7 @@ func (r *taskRepository) List(search string, limit int) ([]*models.Task, error) 
 		}
 
 	default:
-		// Фильтрация по заголовку или комментарию (нечувствительная к регистру Unicode)
+		// Filtering by title or comment (case-insensitive Unicode)
 		query = `
             SELECT id, date, title, comment, repeat
             FROM scheduler
@@ -261,7 +261,7 @@ func (r *taskRepository) List(search string, limit int) ([]*models.Task, error) 
 		}
 		defer rows.Close()
 
-		// Фильтрация на стороне приложения
+		// Application-side filtering
 		searchLower := strings.ToLower(search)
 		for rows.Next() {
 			var task models.Task
@@ -285,12 +285,12 @@ func (r *taskRepository) List(search string, limit int) ([]*models.Task, error) 
 	return tasks, nil
 }
 
-// parseDate - парсит дату в формате "дд.мм.гггг"
+// parseDate - parses a date in the format "dd.mm.yyyy"
 func parseDate(dateStr string) (time.Time, error) {
 	return time.Parse("02.01.2006", dateStr)
 }
 
-// isValidDate - проверяет, является ли строка датой в формате "дд.мм.гггг"
+// isValidDate - checks if the string is a date in the format "dd.mm.yyyy"
 func isValidDate(dateStr string) bool {
 	_, err := parseDate(dateStr)
 	return err == nil

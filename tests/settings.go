@@ -2,12 +2,12 @@ package tests
 
 import "os"
 
-// Port — порт, на котором работает приложение.
+// Port - the port on which the application runs.
 var Port = 7540
 
-// DBFile — путь к файлу базы данных для тестирования.
-// Используем значение переменной окружения TODO_DBFILE, если она установлена.
-// Иначе используем тестовую базу данных по умолчанию.
+// DBFile - path to the database file for testing.
+// Use the value of the TODO_DBFILE environment variable if set.
+// Otherwise, use the default test database.
 var DBFile = func() string {
 	if envDBFile := os.Getenv("TODO_DBFILE"); envDBFile != "" {
 		return envDBFile
@@ -15,13 +15,13 @@ var DBFile = func() string {
 	return "test_data/test_scheduler.db"
 }()
 
-// FullNextDate — флаг, который определяет, включена ли полная обработка следующей даты.
+// FullNextDate - flag that determines whether full next date processing is enabled.
 var FullNextDate = true
 
-// Search — флаг, включающий или отключающий функциональность поиска.
+// Search - flag that enables or disables search functionality.
 var Search = true
 
-// Token — токен для авторизации, который может быть установлен через переменную окружения TOKEN.
+// Token - authorization token that can be set via the TOKEN environment variable.
 var Token = func() string {
 	if envToken := os.Getenv("TOKEN"); envToken != "" {
 		return envToken

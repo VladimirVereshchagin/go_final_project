@@ -8,34 +8,34 @@ import (
 	"github.com/VladimirVereshchagin/scheduler/internal/services"
 )
 
-// App представляет структуру приложения с его настройками и зависимостями
+// App represents the application structure with its configuration and dependencies
 type App struct {
-	Router      *http.ServeMux       // Маршрутизатор для обработки HTTP-запросов
-	TaskService services.TaskService // Сервис для работы с задачами
-	Config      *config.Config       // Конфигурация приложения
+	Router      *http.ServeMux       // Router for handling HTTP requests
+	TaskService services.TaskService // Service for task operations
+	Config      *config.Config       // Application configuration
 }
 
-// NewApp - создаёт новое приложение и регистрирует маршруты
+// NewApp creates a new application and registers the routes
 func NewApp(taskService services.TaskService, cfg *config.Config) *App {
 	app := &App{
-		Router:      http.NewServeMux(), // Инициализация маршрутизатора
-		TaskService: taskService,        // Инициализация сервиса задач
-		Config:      cfg,                // Загрузка конфигурации
+		Router:      http.NewServeMux(), // Initialize router
+		TaskService: taskService,        // Initialize task service
+		Config:      cfg,                // Load configuration
 	}
-	app.registerRoutes() // Регистрация маршрутов
+	app.registerRoutes() // Register routes
 	return app
 }
 
-// registerRoutes - регистрирует маршруты для обработки запросов
+// registerRoutes registers routes for request handling
 func (a *App) registerRoutes() {
-	// Статические файлы (фронтенд)
+	// Static files (frontend)
 	webDir := "./web"
 	a.Router.Handle("/", http.FileServer(http.Dir(webDir)))
 
-	// API маршруты
-	a.Router.HandleFunc("/api/nextdate", a.handleNextDate)                             // Расчёт следующей даты задачи
-	a.Router.HandleFunc("/api/task", middleware.Auth(a.handleTask, a.Config))          // Работа с задачей (CRUD)
-	a.Router.HandleFunc("/api/tasks", middleware.Auth(a.handleTasks, a.Config))        // Получение списка задач
-	a.Router.HandleFunc("/api/task/done", middleware.Auth(a.handleDoneTask, a.Config)) // Отметка задачи как выполненной
-	a.Router.HandleFunc("/api/signin", a.handleSignIn)                                 // Аутентификация пользователя
+	// API routes
+	a.Router.HandleFunc("/api/nextdate", a.handleNextDate)                             // Calculate the next task date
+	a.Router.HandleFunc("/api/task", middleware.Auth(a.handleTask, a.Config))          // Handle task operations (CRUD)
+	a.Router.HandleFunc("/api/tasks", middleware.Auth(a.handleTasks, a.Config))        // Get list of tasks
+	a.Router.HandleFunc("/api/task/done", middleware.Auth(a.handleDoneTask, a.Config)) // Mark task as done
+	a.Router.HandleFunc("/api/signin", a.handleSignIn)                                 // User authentication
 }

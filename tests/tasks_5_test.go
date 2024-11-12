@@ -53,21 +53,21 @@ func TestTasks(t *testing.T) {
 	now := time.Now()
 	addTask(t, task{
 		date:    now.Format(`20060102`),
-		title:   "Просмотр фильма",
-		comment: "с попкорном",
+		title:   "Watch a movie",
+		comment: "with popcorn",
 		repeat:  "",
 	})
 	now = now.AddDate(0, 0, 1)
 	date := now.Format(`20060102`)
 	addTask(t, task{
 		date:    date,
-		title:   "Сходить в бассейн",
+		title:   "Go to the pool",
 		comment: "",
 		repeat:  "",
 	})
 	addTask(t, task{
 		date:    date,
-		title:   "Оплатить коммуналку",
+		title:   "Pay utilities",
 		comment: "",
 		repeat:  "d 30",
 	})
@@ -78,27 +78,27 @@ func TestTasks(t *testing.T) {
 	date = now.Format(`20060102`)
 	addTask(t, task{
 		date:    date,
-		title:   "Поплавать",
-		comment: "Бассейн с тренером",
+		title:   "Swim",
+		comment: "Pool with a coach",
 		repeat:  "d 7",
 	})
 	addTask(t, task{
 		date:    date,
-		title:   "Позвонить в УК",
-		comment: "Разобраться с горячей водой",
+		title:   "Call the MC",
+		comment: "Figure out the hot water issue",
 		repeat:  "",
 	})
 	addTask(t, task{
 		date:    date,
-		title:   "Встретиться с Васей",
-		comment: "в 18:00",
+		title:   "Meet with Vasya",
+		comment: "at 18:00",
 		repeat:  "",
 	})
 
 	tasks = getTasks(t, "")
 	assert.Equal(t, 6, len(tasks))
 
-	tasks = getTasks(t, "УК")
+	tasks = getTasks(t, "MC")
 	assert.Equal(t, 1, len(tasks))
 	tasks = getTasks(t, now.Format(`02.01.2006`))
 	assert.Equal(t, 3, len(tasks))

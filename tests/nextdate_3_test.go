@@ -43,22 +43,22 @@ func TestNextDate(t *testing.T) {
 			get, err := getBody(urlPath)
 			assert.NoError(t, err)
 
-			// Изменение: парсинг тела ответа в JSON для более структурированной обработки
+			// Change: parse response body as JSON for more structured handling
 			var resp map[string]string
 			err = json.Unmarshal(get, &resp)
 			if len(v.want) == 0 {
-				// Изменение: добавлена проверка на наличие ошибки в ответе для некорректных данных
-				assert.NotNil(t, resp["error"], "Ожидается ошибка для входных данных: %v", v)
+				// Change: added check for error in response for invalid data
+				assert.NotNil(t, resp["error"], "Expected error for input data: %v", v)
 				continue
 			}
 
 			assert.NoError(t, err)
 
-			// Изменение: проверка на наличие поля "next_date" в ответе
+			// Change: check for presence of "next_date" field in response
 			next, ok := resp["next_date"]
-			assert.True(t, ok, "Поле 'next_date' не найдено в ответе")
+			assert.True(t, ok, "Field 'next_date' not found in response")
 
-			// Проверка, что значение соответствует ожидаемому
+			// Verify that the value matches the expected result
 			assert.Equal(t, v.want, next, `{%q, %q, %q}`, v.date, v.repeat, v.want)
 		}
 	}

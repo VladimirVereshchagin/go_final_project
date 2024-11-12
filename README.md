@@ -12,6 +12,7 @@
 ## Project Description
 
 **scheduler** is a web application for task scheduling developed in Go. The application allows users to create, view, edit, and delete tasks, as well as mark them as completed. It uses **SQLite** as the database with a pure Go driver [`modernc.org/sqlite`](https://gitlab.com/cznic/sqlite), which simplifies building and deploying the application on different architectures. The application provides a RESTful API and includes a frontend for convenient interaction.
+> **Note:** The web interface is in Russian, so all buttons and labels are displayed in Russian.
 
 ### All Starred Tasks Implemented, Including
 

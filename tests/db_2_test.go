@@ -28,31 +28,31 @@ func count(db *sqlx.DB) (int, error) {
 func openDB(t *testing.T) *sqlx.DB {
 	dbfile := os.Getenv("TODO_DBFILE")
 	if dbfile == "" {
-		dbfile = "data/scheduler.db" // или путь по умолчанию
+		dbfile = "data/scheduler.db" // or default path
 	}
 
-	// Преобразуем путь к базе данных в абсолютный
+	// Convert database path to absolute path
 	absDBPath, err := filepath.Abs(dbfile)
 	if err != nil {
-		t.Fatalf("Не удалось получить абсолютный путь к базе данных: %v", err)
+		t.Fatalf("Failed to get absolute database path: %v", err)
 	}
 
-	// Создаём директорию, если её нет
+	// Create directory if it does not exist
 	dir := filepath.Dir(absDBPath)
 	err = os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
-		t.Fatalf("Не удалось создать директорию для базы данных: %v", err)
+		t.Fatalf("Failed to create directory for database: %v", err)
 	}
 
-	// Открываем базу данных
+	// Open the database
 	db, err := sqlx.Open("sqlite", absDBPath)
 	if err != nil {
-		t.Fatalf("Не удалось подключиться к базе данных: %v", err)
+		t.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Проверяем соединение
+	// Check the connection
 	if err := db.Ping(); err != nil {
-		t.Fatalf("Ошибка соединения с базой данных: %v", err)
+		t.Fatalf("Database connection error: %v", err)
 	}
 
 	return db
@@ -68,7 +68,7 @@ func TestDB(t *testing.T) {
 	today := time.Now().Format(`20060102`)
 
 	res, err := db.Exec(`INSERT INTO scheduler (date, title, comment, repeat)
-        VALUES (?, 'Todo', 'Комментарий', '')`, today)
+        VALUES (?, 'Todo', 'Comment', '')`, today)
 	assert.NoError(t, err)
 
 	id, err := res.LastInsertId()
@@ -79,7 +79,7 @@ func TestDB(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, id, task.ID)
 	assert.Equal(t, `Todo`, task.Title)
-	assert.Equal(t, `Комментарий`, task.Comment)
+	assert.Equal(t, `Comment`, task.Comment)
 
 	_, err = db.Exec(`DELETE FROM scheduler WHERE id = ?`, id)
 	assert.NoError(t, err)

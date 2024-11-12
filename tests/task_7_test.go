@@ -27,31 +27,31 @@ func TestDone(t *testing.T) {
 	now := time.Now()
 	id := addTask(t, task{
 		date:  now.Format(`20060102`),
-		title: "Свести баланс",
+		title: "Balance the books",
 	})
 
 	ret, err := postJSON("api/task/done?id="+id, nil, http.MethodPost)
 	assert.NoError(t, err)
 
-	expected := map[string]any{"message": "Задача отмечена как выполненная"}
-	assert.Equal(t, expected, ret) // Проверка, что возвращаемое сообщение соответствует ожидаемому
+	expected := map[string]any{"message": "Task marked as done"}
+	assert.Equal(t, expected, ret) // Check that the return message matches the expected one
 	notFoundTask(t, id)
 
 	id = addTask(t, task{
-		title:  "Проверить работу /api/task/done",
+		title:  "Check /api/task/done functionality",
 		repeat: "d 3",
 	})
 
 	for i := 0; i < 3; i++ {
 		ret, err := postJSON("api/task/done?id="+id, nil, http.MethodPost)
 		assert.NoError(t, err)
-		assert.Equal(t, expected, ret) // Проверка, что сообщение остаётся корректным после выполнения задачи
+		assert.Equal(t, expected, ret) // Check that the message remains correct after task completion
 
 		var task Task
 		err = db.Get(&task, `SELECT * FROM scheduler WHERE id=?`, id)
 		assert.NoError(t, err)
 		now = now.AddDate(0, 0, 3)
-		assert.Equal(t, task.Date, now.Format(`20060102`)) // Проверка обновлённой даты выполнения задачи
+		assert.Equal(t, task.Date, now.Format(`20060102`)) // Check the updated task completion date
 	}
 }
 
@@ -60,24 +60,24 @@ func TestDelTask(t *testing.T) {
 	defer db.Close()
 
 	id := addTask(t, task{
-		title:  "Временная задача",
+		title:  "Temporary task",
 		repeat: "d 3",
 	})
 	ret, err := postJSON("api/task?id="+id, nil, http.MethodDelete)
 	assert.NoError(t, err)
 
-	expected := map[string]any{"message": "Задача успешно удалена"}
-	assert.Equal(t, expected, ret) // Проверка, что задача была удалена и возвращено сообщение об этом
+	expected := map[string]interface{}{"message": "Task deleted successfully"}
+	assert.Equal(t, expected, ret) // Check that the task was deleted and a success message was returned
 
 	notFoundTask(t, id)
 
 	ret, err = postJSON("api/task", nil, http.MethodDelete)
 	assert.NoError(t, err)
 	_, ok := ret["error"]
-	assert.True(t, ok) // Проверка, что ошибка возвращена для запроса без ID
+	assert.True(t, ok) // Check that an error is returned for a request without an ID
 
 	ret, err = postJSON("api/task?id=wjhgese", nil, http.MethodDelete)
 	assert.NoError(t, err)
 	_, ok = ret["error"]
-	assert.True(t, ok) // Проверка, что ошибка возвращена для некорректного ID
+	assert.True(t, ok) // Check that an error is returned for an incorrect ID
 }

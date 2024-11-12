@@ -1,48 +1,48 @@
 # syntax=docker/dockerfile:1.10
 
-# Этап сборки
+# Build stage
 FROM --platform=$BUILDPLATFORM golang:1.22 AS builder
 
-# Устанавливаем рабочую директорию внутри контейнера
+# Set the working directory inside the container
 WORKDIR /app
 
-# Устанавливаем аргументы сборки для передачи переменных среды
+# Set build arguments for passing environment variables
 ARG TARGETOS
 ARG TARGETARCH
 
-# Устанавливаем переменные окружения для кросс-компиляции
+# Set environment variables for cross-compilation
 ENV GOOS=$TARGETOS
 ENV GOARCH=$TARGETARCH
 ENV CGO_ENABLED=0
 
-# Копируем файлы go.mod и go.sum для загрузки зависимостей
+# Copy go.mod and go.sum files to download dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Копируем весь исходный код приложения
+# Copy all the source code of the application
 COPY . .
 
-# Собираем Go-приложение
+# Build the Go application
 RUN go build -o app ./cmd
 
-# Финальный этап
+# Final stage
 FROM ubuntu:22.04
 
-# Добавляем метаданные для образа
+# Add metadata to the image
 LABEL org.opencontainers.image.source="https://github.com/vladimirvereshchagin/scheduler"
 LABEL maintainer="Vladimir Vereshchagin <vlvereschagin06@gmail.com>"
 
-# Устанавливаем рабочую директорию для финального контейнера
+# Set the working directory for the final container
 WORKDIR /app
 
-# Копируем скомпилированное приложение из этапа сборки
+# Copy the compiled application from the build stage
 COPY --from=builder /app/app .
 
-# Копируем директорию web для фронтенда
+# Copy the web directory for the frontend
 COPY --from=builder /app/web ./web
 
-# Устанавливаем переменную окружения для порта
+# Set environment variable for the port
 ENV TODO_PORT=7540
 
-# Запускаем скомпилированное приложение
+# Run the compiled application
 CMD ["./app"]

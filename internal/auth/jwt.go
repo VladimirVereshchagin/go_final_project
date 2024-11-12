@@ -9,16 +9,16 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// GenerateToken - генерирует JWT токен, содержащий хэш пароля и срок действия
+// GenerateToken generates a JWT token containing the password hash and expiration time
 func GenerateToken(password string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256) // Создание нового токена с HMAC-SHA256
+	token := jwt.New(jwt.SigningMethodHS256) // Create a new token with HMAC-SHA256
 
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "user"                               // Установка субъекта токена
-	claims["exp"] = time.Now().Add(8 * time.Hour).Unix() // Установка срока действия токена (8 часов)
-	claims["hash"] = GeneratePasswordHash(password)      // Хэш пароля для дальнейшей проверки
+	claims["sub"] = "user"                               // Set the subject of the token
+	claims["exp"] = time.Now().Add(8 * time.Hour).Unix() // Set the token expiration time (8 hours)
+	claims["hash"] = GeneratePasswordHash(password)      // Password hash for future validation
 
-	// Подписание токена с использованием пароля
+	// Sign the token using the password
 	tokenString, err := token.SignedString([]byte(password))
 	if err != nil {
 		return "", err
@@ -27,35 +27,35 @@ func GenerateToken(password string) (string, error) {
 	return tokenString, nil
 }
 
-// ParseToken - парсит JWT токен и проверяет его валидность
+// ParseToken parses the JWT token and checks its validity
 func ParseToken(tokenString, password string) (*jwt.Token, error) {
-	// Парсинг токена и проверка метода подписи
+	// Parse the token and check the signing method
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("неожиданный метод подписи: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(password), nil // Возврат ключа (пароль)
+		return []byte(password), nil // Return the key (password)
 	})
 	if err != nil || !token.Valid {
-		return nil, err // Ошибка, если токен недействителен
+		return nil, err // Error if the token is invalid
 	}
 
-	// Проверка claims (утверждений) токена
+	// Check the token claims
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, fmt.Errorf("недопустимые утверждения токена")
+		return nil, fmt.Errorf("invalid token claims")
 	}
 
-	// Сравнение хэша пароля для подтверждения подлинности
+	// Compare the password hash to confirm authenticity
 	if claims["hash"] != GeneratePasswordHash(password) {
-		return nil, fmt.Errorf("недопустимый хэш токена")
+		return nil, fmt.Errorf("invalid token hash")
 	}
 
 	return token, nil
 }
 
-// GeneratePasswordHash - генерирует хэш пароля с использованием SHA-256
+// GeneratePasswordHash generates a password hash using SHA-256
 func GeneratePasswordHash(password string) string {
-	hash := sha256.Sum256([]byte(password)) // Хэширование пароля
-	return hex.EncodeToString(hash[:])      // Преобразование хэша в строку
+	hash := sha256.Sum256([]byte(password)) // Hash the password
+	return hex.EncodeToString(hash[:])      // Convert the hash to a string
 }

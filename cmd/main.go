@@ -13,26 +13,26 @@ import (
 )
 
 func main() {
-	// Загрузка конфигурации
+	// Loading configuration
 	cfg := config.LoadConfig()
 
-	// Инициализация базы данных
+	// Initializing the database
 	db, err := repository.NewDB(cfg.DBFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	// Инициализация репозиториев и сервисов
+	// Initializing repositories and services
 	taskRepo := repository.NewTaskRepository(db)
 	taskService := services.NewTaskService(taskRepo)
 
-	// Инициализация приложения
+	// Initializing the application
 	application := app.NewApp(taskService, cfg)
 
-	// Запуск сервера
-	log.Printf("Запуск сервера на порту %s...\n", cfg.Port)
+	// Starting the server
+	log.Printf("Starting server on port %s...\n", cfg.Port)
 	if err := http.ListenAndServe(":"+cfg.Port, application.Router); err != nil {
-		log.Fatal("Ошибка запуска сервера: ", err)
+		log.Fatal("Server startup error: ", err)
 	}
 }

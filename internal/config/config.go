@@ -9,36 +9,36 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Config - структура для хранения конфигурационных данных
+// Config - structure for storing configuration data
 type Config struct {
-	Port     string // Порт для запуска сервера
-	DBFile   string // Файл базы данных
-	Password string // Пароль для аутентификации
+	Port     string // Port for server startup
+	DBFile   string // Database file
+	Password string // Password for authentication
 }
 
-// LoadConfig - загружает конфигурацию из .env файла или системных переменных
+// LoadConfig loads configuration from .env file or system variables
 func LoadConfig() *Config {
-	// Загружаем переменные окружения из .env файла
+	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Не удалось загрузить .env файл, используем системные переменные")
+		log.Println("Failed to load .env file, using system variables")
 	}
 
 	port := getEnv("TODO_PORT", "7540")
 	if !isValidPort(port) {
-		log.Fatalf("Недопустимый порт: %s", port)
+		log.Fatalf("Invalid port: %s", port)
 	}
 
 	password := os.Getenv("TODO_PASSWORD")
 	if password == "" {
-		log.Println("Внимание: Пароль для авторизации не задан. Доступ будет без аутентификации")
+		log.Println("Warning: Authentication password is not set. Access will be without authentication")
 	}
 
 	dbFile := getEnv("TODO_DBFILE", "data/scheduler.db")
-	// Создаём директорию для базы данных, если её нет
+	// Create the directory for the database if it does not exist
 	err = os.MkdirAll(filepath.Dir(dbFile), os.ModePerm)
 	if err != nil {
-		log.Fatalf("Ошибка создания директории для базы данных: %v", err)
+		log.Fatalf("Error creating directory for database: %v", err)
 	}
 
 	return &Config{
@@ -48,7 +48,7 @@ func LoadConfig() *Config {
 	}
 }
 
-// getEnv - получает значение переменной окружения или возвращает значение по умолчанию
+// getEnv gets the value of an environment variable or returns the default value
 func getEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
@@ -57,7 +57,7 @@ func getEnv(key, defaultValue string) string {
 	return value
 }
 
-// isValidPort - проверяет, что порт находится в допустимом диапазоне
+// isValidPort checks if the port is within the valid range
 func isValidPort(port string) bool {
 	p, err := strconv.Atoi(port)
 	return err == nil && p > 0 && p <= 65535

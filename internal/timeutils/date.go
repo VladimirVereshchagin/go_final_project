@@ -7,23 +7,23 @@ import (
 	"time"
 )
 
-// NextDate - вычисляет следующую дату задачи на основе правила повторения
+// NextDate calculates the next task date based on the repetition rule
 func NextDate(now time.Time, dateStr string, repeat string) (string, error) {
-	// Парсинг строки даты в формат "yyyyMMdd"
+	// Parse the date string in format "yyyyMMdd"
 	date, err := time.Parse("20060102", dateStr)
 	if err != nil {
-		return "", fmt.Errorf("некорректный формат даты: %v", err)
+		return "", fmt.Errorf("invalid date format: %v", err)
 	}
 
-	// Приведение времени к началу дня
+	// Set time to the beginning of the day
 	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 	now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 
 	if repeat == "" {
-		return "", fmt.Errorf("правило повторения не указано")
+		return "", fmt.Errorf("repetition rule is not specified")
 	}
 
-	// Обработка ежегодного повторения
+	// Handle yearly repetition
 	if repeat == "y" {
 		nextDate := date.AddDate(1, 0, 0)
 		for !nextDate.After(now) {
@@ -32,18 +32,18 @@ func NextDate(now time.Time, dateStr string, repeat string) (string, error) {
 		return nextDate.Format("20060102"), nil
 	}
 
-	// Обработка повторения каждые n дней
+	// Handle repetition every n days
 	if strings.HasPrefix(repeat, "d ") {
 		parts := strings.Split(repeat, " ")
 		if len(parts) != 2 {
-			return "", fmt.Errorf("некорректный формат правила 'd'")
+			return "", fmt.Errorf("invalid rule format 'd'")
 		}
 		days, err := strconv.Atoi(parts[1])
 		if err != nil || days < 1 || days > 400 {
-			return "", fmt.Errorf("некорректное количество дней: %v", err)
+			return "", fmt.Errorf("invalid number of days: %v", err)
 		}
 
-		// Рассчитываем следующую дату с шагом в n дней
+		// Calculate the next date with a step of n days
 		nextDate := date.AddDate(0, 0, days)
 		for !nextDate.After(now) {
 			nextDate = nextDate.AddDate(0, 0, days)
@@ -51,20 +51,20 @@ func NextDate(now time.Time, dateStr string, repeat string) (string, error) {
 		return nextDate.Format("20060102"), nil
 	}
 
-	// Обработка повторения по дням недели
+	// Handle weekly repetition
 	if strings.HasPrefix(repeat, "w ") {
 		daysOfWeek := parseDaysOfWeek(repeat[2:])
 		if daysOfWeek == nil {
-			return "", fmt.Errorf("некорректный формат правила 'w'")
+			return "", fmt.Errorf("invalid rule format 'w'")
 		}
 
-		// Вычисляем следующую дату, соответствующую указанным дням недели
+		// Calculate the next date matching the specified days of the week
 		nextDate := date.AddDate(0, 0, 1)
 		for {
 			if nextDate.After(now) {
 				weekday := int(nextDate.Weekday())
 				if weekday == 0 {
-					weekday = 7 // Воскресенье считается как 7
+					weekday = 7 // Sunday is considered as 7
 				}
 				if daysOfWeek[weekday] {
 					return nextDate.Format("20060102"), nil
@@ -72,19 +72,19 @@ func NextDate(now time.Time, dateStr string, repeat string) (string, error) {
 			}
 			nextDate = nextDate.AddDate(0, 0, 1)
 			if nextDate.Sub(now).Hours() > 24*365*5 {
-				return "", fmt.Errorf("не удалось найти следующую дату по правилу 'w'")
+				return "", fmt.Errorf("could not find the next date for rule 'w'")
 			}
 		}
 	}
 
-	// Обработка повторения по дням месяца
+	// Handle monthly repetition
 	if strings.HasPrefix(repeat, "m ") {
 		days, months, err := parseMonthRule(repeat[2:])
 		if err != nil {
-			return "", fmt.Errorf("некорректный формат правила 'm': %v", err)
+			return "", fmt.Errorf("invalid rule format 'm': %v", err)
 		}
 
-		// Вычисляем следующую дату, которая соответствует указанным дням и месяцам
+		// Calculate the next date that matches the specified days and months
 		nextDate := date.AddDate(0, 0, 1)
 		for {
 			if nextDate.After(now) && isValidDayMonth(nextDate, days, months) {
@@ -92,15 +92,15 @@ func NextDate(now time.Time, dateStr string, repeat string) (string, error) {
 			}
 			nextDate = nextDate.AddDate(0, 0, 1)
 			if nextDate.Sub(now).Hours() > 24*365*5 {
-				return "", fmt.Errorf("не удалось найти следующую дату по правилу 'm'")
+				return "", fmt.Errorf("could not find the next date for rule 'm'")
 			}
 		}
 	}
 
-	return "", fmt.Errorf("неподдерживаемое правило повторения")
+	return "", fmt.Errorf("unsupported repetition rule")
 }
 
-// parseDaysOfWeek - парсит строку с днями недели в формате 1-7
+// parseDaysOfWeek parses a string of days of the week in format 1-7
 func parseDaysOfWeek(s string) map[int]bool {
 	parts := strings.Split(s, ",")
 	days := make(map[int]bool)
@@ -114,11 +114,11 @@ func parseDaysOfWeek(s string) map[int]bool {
 	return days
 }
 
-// parseMonthRule - парсит правило по месяцам и дням
+// parseMonthRule parses the rule for months and days
 func parseMonthRule(s string) ([]int, []int, error) {
 	parts := strings.Fields(s)
 	if len(parts) == 0 {
-		return nil, nil, fmt.Errorf("пустое правило 'm'")
+		return nil, nil, fmt.Errorf("empty rule 'm'")
 	}
 
 	days, err := parseDaysOfMonth(parts[0])
@@ -136,41 +136,41 @@ func parseMonthRule(s string) ([]int, []int, error) {
 	return days, months, nil
 }
 
-// parseDaysOfMonth - парсит дни месяца
+// parseDaysOfMonth parses the days of the month
 func parseDaysOfMonth(s string) ([]int, error) {
 	parts := strings.Split(s, ",")
 	var days []int
 	for _, part := range parts {
 		day, err := strconv.Atoi(strings.TrimSpace(part))
 		if err != nil || day < -2 || day == 0 || day > 31 {
-			return nil, fmt.Errorf("некорректный день месяца: %v", part)
+			return nil, fmt.Errorf("invalid day of month: %v", part)
 		}
 		days = append(days, day)
 	}
 	return days, nil
 }
 
-// parseMonths - парсит месяцы
+// parseMonths parses the months
 func parseMonths(s string) ([]int, error) {
 	parts := strings.Split(s, ",")
 	var months []int
 	for _, part := range parts {
 		month, err := strconv.Atoi(strings.TrimSpace(part))
 		if err != nil || month < 1 || month > 12 {
-			return nil, fmt.Errorf("некорректный месяц: %v", part)
+			return nil, fmt.Errorf("invalid month: %v", part)
 		}
 		months = append(months, month)
 	}
 	return months, nil
 }
 
-// isValidDayMonth - проверяет соответствие даты указанным дням и месяцам
+// isValidDayMonth checks if the date matches the specified days and months
 func isValidDayMonth(date time.Time, days []int, months []int) bool {
 	dayValid := false
 	day := date.Day()
 	lastDay := getLastDayOfMonth(date)
 
-	// Проверка дня месяца
+	// Check the day of the month
 	for _, d := range days {
 		var targetDay int
 		if d > 0 {
@@ -187,7 +187,7 @@ func isValidDayMonth(date time.Time, days []int, months []int) bool {
 		}
 	}
 
-	// Проверка месяца
+	// Check the month
 	if !dayValid {
 		return false
 	}
@@ -202,7 +202,7 @@ func isValidDayMonth(date time.Time, days []int, months []int) bool {
 	return false
 }
 
-// getLastDayOfMonth - возвращает последний день месяца
+// getLastDayOfMonth returns the last day of the month
 func getLastDayOfMonth(date time.Time) int {
 	year, month, _ := date.Date()
 	location := date.Location()

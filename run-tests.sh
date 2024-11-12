@@ -2,59 +2,59 @@
 set -euo pipefail
 set +m
 
-# Установить переменную TODO_PASSWORD, если она не установлена
+# Set TODO_PASSWORD variable if not already set
 export TODO_PASSWORD=${TODO_PASSWORD:-""}
 export TODO_DBFILE="$(pwd)/test_data/test_scheduler.db"
 
-# Создаём директорию для тестовой базы данных
+# Create directory for test database
 mkdir -p test_data
 
-# Запуск приложения в фоне
+# Run the application in the background
 nohup ./app &> nohup.out &
-APP_PID=$! # Сохраняем PID приложения
+APP_PID=$! # Save the application PID
 
-# Подождем немного, чтобы приложение успело запуститься
+# Wait a bit to allow the application to start
 sleep 10
 
-# Проверяем, что приложение запущено
+# Check if the application is running
 if ps -p $APP_PID > /dev/null; then
-    echo "Приложение запущено. PID: $APP_PID"
+    echo "Application is running. PID: $APP_PID"
 else
-    echo "Не удалось запустить приложение. PID: $APP_PID"
+    echo "Failed to start the application. PID: $APP_PID"
     exit 1
 fi
 
-# Получение токена
+# Obtain token
 export TOKEN=$(curl -X POST http://localhost:7540/api/signin -H "Content-Type: application/json" -d "{\"password\":\"$TODO_PASSWORD\"}" --silent -c cookies.txt | jq --raw-output .token)
 
 if [[ -z "$TOKEN" ]]; then
-    echo "Не удалось получить токен."
+    echo "Failed to obtain token."
     kill $APP_PID >/dev/null 2>&1 || true
     exit 1
 fi
 
-# Запуск тестов
+# Run tests
 if go test ./tests -count=1; then
-    echo "Тесты пройдены успешно"
+    echo "Tests passed successfully"
 else
-    echo "Тесты не пройдены"
+    echo "Tests failed"
     kill $APP_PID >/dev/null 2>&1 || true
     exit 1
 fi
 
-# Остановка приложения
+# Stop the application
 kill $APP_PID >/dev/null 2>&1 || true
 wait $APP_PID 2>/dev/null || true
-echo "Приложение остановлено. PID: $APP_PID"
+echo "Application stopped. PID: $APP_PID"
 
-# Очистка временных файлов
+# Clean up temporary files
 rm -f nohup.out cookies.txt
 
-# Удаление тестовой базы данных после тестов
+# Delete the test database after tests
 if [[ -f "$TODO_DBFILE" ]]; then
     rm "$TODO_DBFILE"
-    echo "Тестовая база данных $TODO_DBFILE удалена."
+    echo "Test database $TODO_DBFILE deleted."
 fi
 
-# Удаляем директорию для тестовой базы данных, если она пуста
+# Remove test database directory if it is empty
 rmdir test_data 2>/dev/null || true

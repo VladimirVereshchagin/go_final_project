@@ -1,10 +1,10 @@
 package models
 
-// Task представляет задачу в планировщике
+// Task represents a task in the scheduler
 type Task struct {
-	ID      string `json:"id"`                   // Уникальный идентификатор задачи
-	Date    string `json:"date" db:"date"`       // Дата задачи
-	Title   string `json:"title" db:"title"`     // Название задачи
-	Comment string `json:"comment" db:"comment"` // Дополнительный комментарий к задаче
-	Repeat  string `json:"repeat" db:"repeat"`   // Правило повторения задачи
+	ID      string `json:"id"`                   // Unique identifier for the task
+	Date    string `json:"date" db:"date"`       // Task date
+	Title   string `json:"title" db:"title"`     // Task title
+	Comment string `json:"comment" db:"comment"` // Additional comment for the task
+	Repeat  string `json:"repeat" db:"repeat"`   // Task repetition rule
 }

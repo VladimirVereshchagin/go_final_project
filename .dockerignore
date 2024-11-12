@@ -1,4 +1,4 @@
-# Игнорируем бинарные файлы
+# Ignore binary files
 scheduler
 *.exe
 *.dll
@@ -6,42 +6,42 @@ scheduler
 *.dylib
 *.test
 
-# Игнорируем файлы конфигурации среды
+# Ignore environment configuration files
 .env
 .env.*
 
-# Исключаем конфиденциальные данные (если есть)
+# Exclude confidential data (if any)
 *.key
 *.pem
 
-# Игнорируем файлы логов
+# Ignore log files
 *.log
 
-# Игнорируем директории кэша и сборки
+# Ignore cache and build directories
 build/
 tmp/
 *.out
 
-# Игнорируем модули и директории зависимостей Go
+# Ignore Go modules and dependency directories
 vendor/
 .gopath/
 
-# Настройки операционной системы и IDE
+# OS and IDE settings
 .DS_Store
 .idea/
 .vscode/
 
-# Файлы покрытия и тестирования
+# Coverage and testing files
 *.coverprofile
 coverage.out
 testdata/
 
-# Игнорируем базу данных
+# Ignore database
 scheduler.db
 
-# Временные файлы
+# Temporary files
 cookies.txt
 nohup.out
 
-# Тестовая база данных
+# Test database
 test_scheduler.db

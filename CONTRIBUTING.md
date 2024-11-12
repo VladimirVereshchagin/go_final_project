@@ -68,11 +68,19 @@ To build and test the project on your local machine:
     go build -o app ./cmd
     ```
 
-2. **Run the Docker Container**: If you need to test the build in Docker, use the following command:
+2. **Run the Docker Container**: You can test the build using Docker. The Docker image is available in both Docker Hub and GitHub Packages.
 
-    ```bash
-    docker run -d -p 7540:7540 --name scheduler --env-file .env vladimirvereschagin/scheduler:latest
-    ```
+   - **From Docker Hub**:
+
+     ```bash
+     docker run -d -p 7540:7540 --name scheduler --env-file .env vladimirvereschagin/scheduler:latest
+     ```
+
+   - **From GitHub Packages**:
+
+     ```bash
+     docker run -d -p 7540:7540 --name scheduler --env-file .env ghcr.io/vladimirvereshchagin/scheduler:latest
+     ```
 
 ## Code Style and Pre-commit Hooks
 
@@ -88,3 +96,7 @@ pre-commit run --all-files --verbose
 If you have questions or suggestions, create an [Issue](https://github.com/VladimirVereshchagin/scheduler/issues) on GitHub or participate in the [Discussions](https://github.com/VladimirVereshchagin/scheduler/discussions) section. We’re always open to your ideas and suggestions for improving the project.
 
 Thank you for contributing to the project! 🙌 We appreciate each contributor and strive to make `scheduler` better together!
+
+## Additional Information
+
+- **Web Interface Language**: The web interface of the application is currently available in Russian. If you are working on front-end updates, please note this language preference.

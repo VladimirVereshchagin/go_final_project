@@ -88,9 +88,9 @@ func TestAddTask(t *testing.T) {
 	tbl := []task{
 		{"20240129", "", "", ""},
 		{"20240192", "Qwerty", "", ""},
-		{"28.01.2024", "Заголовок", "", ""},
-		{"20240112", "Заголовок", "", "w"},
-		{"20240212", "Заголовок", "", "ooops"},
+		{"28.01.2024", "Title", "", ""},
+		{"20240112", "Title", "", "w"},
+		{"20240212", "Title", "", "ooops"},
 	}
 	for _, v := range tbl {
 		m, err := postJSON("api/task", map[string]any{
@@ -103,7 +103,7 @@ func TestAddTask(t *testing.T) {
 
 		e, ok := m["error"]
 		assert.False(t, !ok || len(fmt.Sprint(e)) == 0,
-			"Ожидается ошибка для задачи %v", v)
+			"Expected error for task %v", v)
 	}
 
 	now := time.Now()
@@ -124,14 +124,14 @@ func TestAddTask(t *testing.T) {
 
 			e, ok := m["error"]
 			if ok && len(fmt.Sprint(e)) > 0 {
-				t.Errorf("Неожиданная ошибка %v для задачи %v", e, v)
+				t.Errorf("Unexpected error %v for task %v", e, v)
 				continue
 			}
 			var task Task
 			var mid any
 			mid, ok = m["id"]
 			if !ok {
-				t.Errorf("Не возвращён id для задачи %v", v)
+				t.Errorf("ID not returned for task %v", v)
 				continue
 			}
 			id := fmt.Sprint(mid)
@@ -144,27 +144,27 @@ func TestAddTask(t *testing.T) {
 			assert.Equal(t, v.comment, task.Comment)
 			assert.Equal(t, v.repeat, task.Repeat)
 			if task.Date < now.Format(`20060102`) {
-				t.Errorf("Дата не может быть меньше сегодняшней %v", v)
+				t.Errorf("Date cannot be earlier than today %v", v)
 				continue
 			}
 			if today && task.Date != now.Format(`20060102`) {
-				t.Errorf("Дата должна быть сегодняшняя %v", v)
+				t.Errorf("Date should be today %v", v)
 			}
 		}
 	}
 
 	tbl = []task{
-		{"", "Заголовок", "", ""},
-		{"20231220", "Сделать что-нибудь", "Хорошо отдохнуть", ""},
-		{"20240108", "Уроки", "", "d 10"},
-		{"20240102", "Отдых в Сочи", "На лыжах", "y"},
-		{"today", "Фитнес", "", "d 1"},
-		{"today", "Шмитнес", "", ""},
+		{"", "Title", "", ""},
+		{"20231220", "Do something", "Rest well", ""},
+		{"20240108", "Lessons", "", "d 10"},
+		{"20240102", "Vacation in Sochi", "Skiing", "y"},
+		{"today", "Fitness", "", "d 1"},
+		{"today", "Shmitness", "", ""},
 	}
 	check()
 	if FullNextDate {
 		tbl = []task{
-			{"20240129", "Сходить в магазин", "", "w 1,3,5"},
+			{"20240129", "Go to the store", "", "w 1,3,5"},
 		}
 		check()
 	}
