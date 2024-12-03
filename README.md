@@ -75,42 +75,22 @@ go build -o app ./cmd
 
 Open your browser and go to:
 
-```bash
-http://localhost:7540/
-```
+[http://localhost:7540/](http://localhost:7540/)
 
 If a password is set (the `TODO_PASSWORD` variable is not empty), you will be redirected to the login page:
 
-```bash
-http://localhost:7540/login.html
-```
+[http://localhost:7540/login.html](http://localhost:7540/login.html)
 
 Enter the configured password to access the application.
 
-## Quick Start via Docker Hub
+## Quick Start with Prebuilt Docker Images
 
-For quick deployment of the application, you can use the ready-made Docker image available on [Docker Hub](https://hub.docker.com/r/vladimirvereschagin/scheduler). The image supports `linux/amd64` and `linux/arm64` architectures, making it compatible with various platforms.
+You can quickly deploy the application using prebuilt Docker images. Two options are available:
 
-### Run the Container
+1. **Docker Hub**: [Docker Hub repository for scheduler](https://hub.docker.com/r/vladimirvereschagin/scheduler)
+2. **GitHub Packages**: [GitHub Packages for scheduler](https://github.com/VladimirVereshchagin/scheduler/packages)
 
-## Important
-
-Before running the container, make sure you set the correct password in the `TODO_PASSWORD` environment variable, or leave it empty if you want to run the application without a password. These values should match those specified in the `.env` file. This is necessary for proper authentication in the application. The `data` directory, which already exists in the project, is used to store the database. Use the following command to run the container:
-
-```bash
-docker run -d \
-  -p 7540:7540 \
-  --name scheduler \
-  --env TODO_PORT=7540 \
-  --env TODO_DBFILE=data/scheduler.db \
-  --env TODO_PASSWORD=your_password_here \
-  -v $(pwd)/data:/app/data \
-  vladimirvereschagin/scheduler:latest
-```
-
-### Quick Start via GitHub Packages
-
-Alternatively, you can deploy the application using the image from **GitHub Packages**:
+Use the following command to run the container. Replace `<IMAGE>` with either `vladimirvereschagin/scheduler:latest` (for Docker Hub) or `ghcr.io/vladimirvereschagin/scheduler:latest` (for GitHub Packages):
 
 ```bash
 docker run -d \
@@ -120,24 +100,19 @@ docker run -d \
   --env TODO_DBFILE=data/scheduler.db \
   --env TODO_PASSWORD=your_password_here \
   -v $(pwd)/data:/app/data \
-  ghcr.io/vladimirvereshchagin/scheduler:latest
+  <IMAGE>
 ```
 
-### Explanation
-
-- `-p 7540:7540` — Maps port 7540 to access the application at `http://localhost:7540/`.
-- `--env TODO_PORT=7540` — Specifies the application’s port.
-- `--env TODO_DBFILE=data/scheduler.db` — Connects the database file.
-- `--env TODO_PASSWORD=your_password_here` — Sets the password to access the application (leave empty to run without a password).
-- `-v $(pwd)/data:/app/data` — Mounts the database on the host to persist data outside the container.
+> **Note:**
+>
+> 1. Ensure that the `TODO_PASSWORD` environment variable matches the value specified in the `.env` file, or leave it empty if you want to run the application without authentication.
+> 2. The `data` directory, which already exists in the project repository, is used to store the SQLite database (`scheduler.db`). Make sure this directory is writable by the Docker container to ensure proper operation of the application.
 
 ### Access via Browser
 
 After starting the container, the application will be available at:
 
-```bash
-http://localhost:7540/
-```
+[http://localhost:7540/](http://localhost:7540/)
 
 ### Stop and Remove the Container
 
